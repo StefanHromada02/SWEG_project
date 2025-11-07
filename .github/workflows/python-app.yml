@@ -1,57 +1,81 @@
-# Der Workflow-Name ist angepasst, um das Backend und Poetry zu spiegeln
-name: Backend CI / Poetry Tests
+name: Backend CI / Integration Tests
 
 on:
-  push:
-    branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
+    branches: ['main']
 
 permissions:
   contents: read
 
 jobs:
-  build:
+  test_backend:
     runs-on: ubuntu-latest
 
+    container: python:3.11-slim
+
+    # Startet die Datenbank und MinIO als Services für Integrationstests
+    services:
+      db:
+        image: postgres:15-alpine
+        # Wichtig: Diese Credentials müssen in Ihren Tests verwendet werden
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: social_media_db
+        # Stellt sicher, dass die Datenbank bereit ist, bevor die Schritte beginnen
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      minio:
+        image: minio/minio
+        env:
+          MINIO_ROOT_USER: minio
+          MINIO_ROOT_PASSWORD: minio
+        ports:
+          - 9000:9000 # Ermöglicht den Zugriff über den Host-Port, falls nötig
+        command: server /data --console-address ":9001"
+
     steps:
-    - name: 1. Code abrufen
-      uses: actions/checkout@v4
+      - name: 1. Code abrufen
+        uses: actions/checkout@v4
 
-    # 2. Python einrichten (Empfohlen: 3.11 oder neuer)
-    - name: 2. Set up Python 3.11
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-        
-    - name: 3. Install Poetry
-      uses: snok/install-poetry@v1
-      
-    # 4. Caching der Abhängigkeiten
-    - name: 4. Cache Poetry virtualenv
-      uses: actions/cache@v4
-      with:
-        path: ~/.local/share/pypoetry/Cache/virtualenvs
-        # WICHTIG: Cache-Key muss den Pfad zur Lock-Datei im Ordner "be" verwenden!
-        key: ${{ runner.os }}-poetry-${{ hashFiles('be/poetry.lock') }} 
-        restore-keys: |
-          ${{ runner.os }}-poetry-
+      # Alle weiteren Schritte laufen nun INNEN des 'python:3.11-slim' Containers.
 
-    # 5. Abhängigkeiten installieren
-    - name: 5. Install Dependencies (Poetry)
-      # WICHTIG: Arbeitsverzeichnis auf den Ordner "be" setzen
-      working-directory: ./be/
-      run: poetry install --no-root
-      
-    # 6. Lint mit Flake8 (Optional)
-    - name: 6. Lint with Flake8
-      # WICHTIG: Im Ordner "be" ausführen
-      working-directory: ./be/
-      run: |
-        poetry run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: 2. Create venv and Install Dependencies
+        working-directory: ./be/
+        run: |
+          # 2.1 Erstellt die virtuelle Umgebung im Unterordner
+          python -m venv .venv 
+          # 2.2 Installiert Abhängigkeiten, Pytest und Flake8
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install -r requirements.txt
+          .venv/bin/pip install pytest flake8  # Stellen Sie sicher, dass diese Tools installiert werden
 
-    # 7. Tests ausführen
-    - name: 7. Test with pytest
-      # WICHTIG: Im Ordner "be" ausführen
-      working-directory: ./be/
-      run: poetry run pytest
+      - name: 3. Warte auf Datenbank-Bereitschaft
+        working-directory: ./be/
+        run: |
+          # Ein kurzer Sleep kann helfen, der DB Zeit zum Starten zu geben (oder 'wait-for-it.sh' nutzen)
+          sleep 10
+
+      - name: 4. Lint mit Flake8
+        working-directory: ./be/
+        run: |
+          .venv/bin/flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      - name: 5. Test with pytest (Unit & Integration)
+        working-directory: ./be/
+        env:
+          # Exponiert die Umgebungsvariablen für die Backend-Tests
+          # Der Hostname ist der Service-Name (db, minio)
+          POSTGRES_HOST: db
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+          MINIO_ENDPOINT: minio:9000
+          MINIO_ACCESS_KEY: test_minio_user
+          MINIO_SECRET_KEY: test_minio_password
+        run: |
+          .venv/bin/pytest
