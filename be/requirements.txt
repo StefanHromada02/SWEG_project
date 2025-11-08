@@ -5,4 +5,7 @@
 # numpy>=1.21.0
 # pandas>=1.4.0
 
+# Database and ORM
+sqlalchemy>=2.0.0
+
 # Development dependencies (install with: pip install -r requirements-dev.txt)
