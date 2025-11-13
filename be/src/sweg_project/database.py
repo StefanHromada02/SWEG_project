@@ -1,9 +1,11 @@
 """Database service layer for the SWEG project."""
 
 import os
+from typing import List, Optional
+
 from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker, joinedload
-from typing import List, Optional
+
 from .models import Base, User, Post
 
 
