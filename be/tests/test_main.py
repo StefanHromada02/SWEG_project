@@ -5,10 +5,11 @@ Tests for the main module and database operations.
 import pytest
 import tempfile
 import os
-from sweg_project.database import DatabaseService
-from sweg_project.models import User, Post, get_european_time
 from zoneinfo import ZoneInfo
 from datetime import datetime
+
+from src.sweg_project.database import DatabaseService
+from src.sweg_project.models import Post, User, get_european_time
 
 
 class TestDatabaseService:
