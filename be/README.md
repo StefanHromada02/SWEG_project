@@ -53,6 +53,7 @@ python -m sweg_project.main
 ```
 
 This will:
+
 - Create a sample user
 - Create multiple posts with different content
 - Display the latest post
@@ -78,6 +79,7 @@ pytest tests/test_main.py::TestDatabaseService::test_create_user -v
 ```
 
 **Test Coverage:**
+
 - **DatabaseService Tests**: User creation, post management, data retrieval
 - **Models Tests**: European timezone functionality, string representations
 - **Integration Tests**: Complete workflow from user creation to post retrieval
@@ -131,12 +133,14 @@ SWEG_project/
 ## Database Schema
 
 **Users Table:**
+
 - `id`: Primary key (auto-increment)
 - `username`: Unique username (max 50 chars)
 - `email`: Unique email (max 100 chars)
 - `created_at`: Creation timestamp (European timezone)
 
 **Posts Table:**
+
 - `id`: Primary key (auto-increment)
 - `title`: Post title (max 200 chars)
 - `text`: Post content (text)
