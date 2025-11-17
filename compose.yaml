@@ -11,10 +11,15 @@ services:
     container_name: social-media-backend
     restart: always
     environment:
+      # WICHTIG: Der Hostname für die interne DB-Verbindung ist immer der Service-Name 'db'
       POSTGRES_HOST: db
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+
+      # Zusammengesetzte URL (falls in settings.py verwendet)
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+
       MINIO_ENDPOINT: minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
@@ -26,20 +31,21 @@ services:
       - minio
 
   # -----------------------------------------------------------------
-  # ANGULAR FRONTEND (FE)
+  # ANGULAR FRONTEND (FE) - KORRIGIERT
   # -----------------------------------------------------------------
-  frontend:
-    build:
-      context: ./fe
-      dockerfile: Dockerfile
-    container_name: social-media-frontend
-    restart: always
-    environment:
-      API_BASE_URL: http://backend:8000/api 
-    ports:
-      - "4200:80"
-    depends_on:
-      - backend
+#  frontend:
+#    build:
+#      context: ./fe
+#      dockerfile: Dockerfile
+#    container_name: social-media-frontend
+#    restart: always
+#    environment:
+#      # API_BASE_URL nutzt den Service-Namen des Backends
+#      API_BASE_URL: http://backend:8000/api
+#    ports:
+#      - "4200:80"
+#    depends_on:
+#      - backend  # 🚨 KORREKTUR: Muss auf den Service-Namen 'backend' warten
 
   # -----------------------------------------------------------------
   # POSTGRESQL DATABASE
