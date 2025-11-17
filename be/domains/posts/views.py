@@ -2,6 +2,7 @@
 from rest_framework import viewsets, permissions, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 
@@ -33,10 +34,8 @@ class PostViewSet(viewsets.ModelViewSet):
             # Upload to MinIO
             image_path = minio_storage.upload_image(image_file)
             if not image_path:
-                return Response(
-                    {"error": "Failed to upload image"},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
+                # Raise validation error instead of returning Response
+                raise ValidationError({"image_file": "Failed to upload image"})
         
         # Save with MinIO path
         serializer.save(image=image_path or "")
@@ -58,10 +57,7 @@ class PostViewSet(viewsets.ModelViewSet):
             # Upload new image
             image_path = minio_storage.upload_image(image_file)
             if not image_path:
-                return Response(
-                    {"error": "Failed to upload image"},
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
+                raise ValidationError({"image_file": "Failed to upload image"})
             serializer.save(image=image_path)
         else:
             serializer.save()

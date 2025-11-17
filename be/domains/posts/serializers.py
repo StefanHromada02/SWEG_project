@@ -25,3 +25,21 @@ class PostSerializer(serializers.ModelSerializer):
             )
         
         return value
+    
+    def create(self, validated_data):
+        """
+        Custom create to remove image_file from validated_data.
+        Image upload is handled in the view's perform_create.
+        """
+        # Remove image_file if present (it's write-only and not a model field)
+        validated_data.pop('image_file', None)
+        return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
+        """
+        Custom update to remove image_file from validated_data.
+        Image upload is handled in the view's perform_update.
+        """
+        # Remove image_file if present (it's write-only and not a model field)
+        validated_data.pop('image_file', None)
+        return super().update(instance, validated_data)

@@ -12,4 +12,9 @@ class Post(models.Model):
     objects = PostManager()
 
     def __str__(self):
-        return f"{self.title} by {self.user.username}"
+        # Get user object to display username
+        try:
+            user_obj = User.objects.get(id=self.user)
+            return f"{self.title} by {user_obj.username}"
+        except User.DoesNotExist:
+            return f"{self.title} by user#{self.user}"

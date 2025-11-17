@@ -252,9 +252,9 @@ class PostImageUploadTests(APITestCase):
         
         response = self.client.post(self.list_url, data, format='multipart')
         
-        # Should handle gracefully (implementation dependent)
-        # Currently returns 500, could be improved to 400
-        self.assertIn(response.status_code, [status.HTTP_400_BAD_REQUEST, status.HTTP_500_INTERNAL_SERVER_ERROR])
+        # Should return 400 Bad Request due to ValidationError
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('image_file', response.data)
 
     @patch('services.minio_storage.minio_storage.upload_image')
     @patch('services.minio_storage.minio_storage.delete_image')

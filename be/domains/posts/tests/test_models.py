@@ -14,7 +14,7 @@ class PostModelTests(TestCase):
 
         # Create posts with controlled timing for sorting tests
         cls.post_older = Post.objects.create(
-            user=cls.user,
+            user=cls.user.id,  # Use user ID, not user object
             title="Older Post",
             text="This is an older post.",
             image="http://example.com/older.jpg"
@@ -22,7 +22,7 @@ class PostModelTests(TestCase):
         # Ensure the next post is measurably newer
         time.sleep(0.01)
         cls.post_newer = Post.objects.create(
-            user=cls.user,
+            user=cls.user.id,  # Use user ID, not user object
             title="Newer Post",
             text="This is a newer post.",
             image="http://example.com/newer.jpg"

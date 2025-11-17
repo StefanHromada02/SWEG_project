@@ -150,11 +150,14 @@ class PostSerializerImageValidationTests(TestCase):
         """Test that images larger than 5MB are rejected."""
         # Create 6MB image
         image_file = self.create_test_image(size_mb=6, format='JPEG')
+        image_data = image_file.read()
         uploaded_file = SimpleUploadedFile(
             "large.jpg",
-            image_file.read(),
+            image_data,
             content_type="image/jpeg"
         )
+        # Manually set size to ensure it's larger than 5MB
+        uploaded_file.size = len(image_data)
         
         data = {
             "user": 1,
