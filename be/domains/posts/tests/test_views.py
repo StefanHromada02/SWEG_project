@@ -27,8 +27,8 @@ class PostViewSetTests(APITestCase):
 
     def setUp(self):
         # URLs werden in setUp definiert, da sie instance-specific sein können
-        self.list_url = reverse('post-list')
-        self.detail_url = reverse('post-detail', kwargs={'pk': self.post.pk})
+        self.list_url = reverse('post-list') # 'post-list' ist der List- und Create-Endpunkt deiner ViewSet-Route → entspricht zB /api/posts/
+        self.detail_url = reverse('post-detail', kwargs={'pk': self.post.pk}) # 'post-detail' ist der Detail-, Update- und Delete-Endpunkt → entspricht zB /api/posts/<id>/
 
     def test_get_post_list(self):
         """Test GET /api/posts/ returns list of posts."""
