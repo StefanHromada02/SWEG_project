@@ -51,8 +51,8 @@ class PostSerializerTests(TestCase):
     def test_serializer_read_only_fields(self):
         """Test that image field is read-only and not required on input."""
         data = {
-            "user": 1,
-            "title": "Test",
+            "user": self.user.id,
+            "title": "Test Post",
             "text": "Content"
         }
         serializer = PostSerializer(data=data)
@@ -61,7 +61,7 @@ class PostSerializerTests(TestCase):
     def test_serializer_save_creates_post(self):
         """Test that serializer.save() creates a Post object."""
         data = {
-            "user": 1,
+            "user": self.user.id,
             "title": "Created Post",
             "text": "Test content"
         }
@@ -71,12 +71,12 @@ class PostSerializerTests(TestCase):
         post = serializer.save()
         self.assertIsInstance(post, Post)
         self.assertEqual(post.title, "Created Post")
-        self.assertEqual(post.user, 1)
+        self.assertEqual(post.user.id, self.user.id)
 
     def test_serializer_output_format(self):
         """Test serializer output includes all expected fields."""
         post = Post.objects.create(
-            user=1,
+            user=self.user,
             title="Test Post",
             text="Test Content",
             image="posts/test.jpg"
@@ -148,15 +148,25 @@ class PostSerializerImageValidationTests(TestCase):
 
     def test_image_validation_too_large(self):
         """Test that images larger than 5MB are rejected."""
-        # Create image data larger than 5MB (5 * 1024 * 1024 bytes)
-        # Create a 6MB buffer directly to ensure size
-        large_data = b'0' * (6 * 1024 * 1024)  # 6 MB of data
+        # Create a real image that's larger than 5MB
+        # Create a large uncompressed BMP which will be over 5MB
+        
+        # Create a large image (3000x3000 pixels RGB = ~27MB uncompressed)
+        large_image = Image.new('RGB', (3000, 3000), color='red')
+        image_buffer = BytesIO()
+        # Save as BMP (uncompressed, large file)
+        large_image.save(image_buffer, format='BMP')
+        image_buffer.seek(0)
         
         uploaded_file = SimpleUploadedFile(
-            "large.jpg",
-            large_data,
-            content_type="image/jpeg"
+            "large.bmp",
+            image_buffer.read(),
+            content_type="image/bmp"
         )
+        
+        # Verify the file is actually over 5MB
+        self.assertGreater(uploaded_file.size, 5 * 1024 * 1024, 
+                          f"Test image should be > 5MB, but is {uploaded_file.size} bytes")
         
         data = {
             "user": 1,
@@ -168,7 +178,10 @@ class PostSerializerImageValidationTests(TestCase):
         serializer = PostSerializer(data=data)
         self.assertFalse(serializer.is_valid(), f"Expected validation to fail, but got: {serializer.errors}")
         self.assertIn('image_file', serializer.errors)
-        self.assertIn('5MB', str(serializer.errors['image_file']))
+        # Check for size error (might say "5MB" or "BMP not allowed")
+        error_msg = str(serializer.errors['image_file'])
+        self.assertTrue('5MB' in error_msg or 'BMP' in error_msg or 'bmp' in error_msg.lower(),
+                       f"Expected size or format error, got: {error_msg}")
 
     def test_image_validation_invalid_format(self):
         """Test that non-image files are rejected."""

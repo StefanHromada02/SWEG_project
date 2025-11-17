@@ -106,7 +106,7 @@ class PostAPIIntegrationTests(APITestCase):
         # Create posts with known order
         for i in range(5):
             Post.objects.create(
-                user=i + 1,
+                user=self.user,
                 title=f"Post {chr(65 + i)}",  # Post A, Post B, etc.
                 text=f"Content {i}",
                 image=""

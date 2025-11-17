@@ -14,7 +14,7 @@ class PostModelTests(TestCase):
 
         # Create posts with controlled timing for sorting tests
         cls.post_older = Post.objects.create(
-            user=cls.user.id,  # Use user ID, not user object
+            user=cls.user,  # Use user object now that it's a ForeignKey
             title="Older Post",
             text="This is an older post.",
             image="http://example.com/older.jpg"
@@ -22,7 +22,7 @@ class PostModelTests(TestCase):
         # Ensure the next post is measurably newer
         time.sleep(0.01)
         cls.post_newer = Post.objects.create(
-            user=cls.user.id,  # Use user ID, not user object
+            user=cls.user,  # Use user object now that it's a ForeignKey
             title="Newer Post",
             text="This is a newer post.",
             image="http://example.com/newer.jpg"
@@ -44,16 +44,15 @@ class PostModelTests(TestCase):
     def test_manager_with_author_prefetching(self):
         """Testet, ob 'with_author' N+1 Abfragen verhindert."""
 
-        # We expect 2 queries:
-        # 1. Query for all posts
-        # 2. Query for all related users (prefetched by select_related)
-        # Wenn 'with_author' nicht funktioniert, wären es 1 (Posts) + N (Users) = 3 Queries.
+        # We expect 1 query with select_related:
+        # 1. Query for all posts WITH users (JOINed)
+        # Without select_related, it would be 1 (Posts) + N (Users) = 3 Queries.
 
         with self.assertNumQueries(1):
             # Hole alle Posts UND deren Autoren
             posts = list(Post.objects.with_author())
 
-            # Greife auf die Autoren zu (löst die prefetched data aus)
+            # Greife auf die Autoren zu (sollte keine zusätzlichen Queries verursachen)
             for post in posts:
                 # This access would cause N+1 queries if 'with_author' failed
                 _ = post.user.username
