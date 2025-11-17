@@ -148,16 +148,15 @@ class PostSerializerImageValidationTests(TestCase):
 
     def test_image_validation_too_large(self):
         """Test that images larger than 5MB are rejected."""
-        # Create 6MB image
-        image_file = self.create_test_image(size_mb=6, format='JPEG')
-        image_data = image_file.read()
+        # Create image data larger than 5MB (5 * 1024 * 1024 bytes)
+        # Create a 6MB buffer directly to ensure size
+        large_data = b'0' * (6 * 1024 * 1024)  # 6 MB of data
+        
         uploaded_file = SimpleUploadedFile(
             "large.jpg",
-            image_data,
+            large_data,
             content_type="image/jpeg"
         )
-        # Manually set size to ensure it's larger than 5MB
-        uploaded_file.size = len(image_data)
         
         data = {
             "user": 1,
@@ -167,7 +166,7 @@ class PostSerializerImageValidationTests(TestCase):
         }
         
         serializer = PostSerializer(data=data)
-        self.assertFalse(serializer.is_valid())
+        self.assertFalse(serializer.is_valid(), f"Expected validation to fail, but got: {serializer.errors}")
         self.assertIn('image_file', serializer.errors)
         self.assertIn('5MB', str(serializer.errors['image_file']))
 

@@ -19,3 +19,11 @@ class PostManager(models.Manager):
     """Custom Manager that uses the custom QuerySet."""
     def get_queryset(self):
         return PostQuerySet(self.model, using=self._db)
+    
+    def with_author(self):
+        """Delegate to QuerySet method."""
+        return self.get_queryset().with_author()
+    
+    def newest_first(self):
+        """Delegate to QuerySet method."""
+        return self.get_queryset().newest_first()
