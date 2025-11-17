@@ -176,6 +176,9 @@ docker-compose exec backend python manage.py test --verbosity=2
 # Alle Tests
 python manage.py test
 
+# Mit Test-Settings (deaktiviert MinIO)
+DJANGO_SETTINGS_MODULE=config.settings_test python manage.py test
+
 # Nur bestimmte Tests
 python manage.py test domains.posts.tests.test_integration
 
@@ -184,6 +187,21 @@ pip install coverage
 coverage run --source='.' manage.py test
 coverage report
 coverage html  # Erstellt HTML Report in htmlcov/
+```
+
+### Test-Umgebung Konfiguration
+
+**Für CI/CD (GitHub Actions):**
+Die Tests verwenden automatisch `config.settings_test.py`, welches:
+- MinIO deaktiviert (`MINIO_ENABLED=false`)
+- Schnellere Password Hashing verwendet
+- Vereinfachte Validierungen nutzt
+- In-Memory File Storage verwendet
+
+**Umgebungsvariablen für Tests:**
+```bash
+export MINIO_ENABLED=false  # Deaktiviert MinIO für Tests
+export DJANGO_SETTINGS_MODULE=config.settings_test  # Verwendet Test-Settings
 ```
 
 ### Test-Struktur

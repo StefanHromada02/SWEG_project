@@ -26,7 +26,10 @@ COPY . /app/
 # --- ENTRYPOINT LOGIK ---
 # Kopiere das Entrypoint-Skript und mache es ausführbar
 COPY entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/entrypoint.sh
+# Entferne Windows-Zeilenumbrüche (falls vorhanden) und mache ausführbar
+# sed wird nur ausgeführt wenn vorhanden, chmod immer
+RUN (sed -i 's/\r$//' /usr/local/bin/entrypoint.sh 2>/dev/null || true) && \
+    chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 8000
 

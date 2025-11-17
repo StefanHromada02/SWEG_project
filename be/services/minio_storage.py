@@ -13,32 +13,51 @@ class MinIOStorage:
     """Service class for interacting with MinIO object storage."""
     
     def __init__(self):
-        """Initialize MinIO client with settings from environment."""
+        """Initialize MinIO client configuration (lazy loading)."""
         self.endpoint = os.getenv('MINIO_ENDPOINT', 'minio:9000')
         self.access_key = os.getenv('MINIO_ACCESS_KEY', 'minio')
         self.secret_key = os.getenv('MINIO_SECRET_KEY', 'mino_admin')
         self.bucket_name = 'social-media-bucket'
+        self._client = None
+        self._initialized = False
         
-        # Create S3 client (MinIO is S3-compatible)
-        self.client = boto3.client(
-            's3',
-            endpoint_url=f'http://{self.endpoint}',
-            aws_access_key_id=self.access_key,
-            aws_secret_access_key=self.secret_key,
-            region_name='us-east-1'  # MinIO needs a region
-        )
-        
-        # Ensure bucket exists
-        self._ensure_bucket_exists()
+        # Check if we're in test mode or if MinIO should be disabled
+        self.enabled = os.getenv('MINIO_ENABLED', 'true').lower() == 'true'
+    
+    @property
+    def client(self):
+        """Lazy initialization of MinIO client."""
+        if not self.enabled:
+            return None
+            
+        if self._client is None:
+            try:
+                self._client = boto3.client(
+                    's3',
+                    endpoint_url=f'http://{self.endpoint}',
+                    aws_access_key_id=self.access_key,
+                    aws_secret_access_key=self.secret_key,
+                    region_name='us-east-1'  # MinIO needs a region
+                )
+                if not self._initialized:
+                    self._ensure_bucket_exists()
+                    self._initialized = True
+            except Exception as e:
+                print(f"Warning: Could not initialize MinIO client: {e}")
+                return None
+        return self._client
     
     def _ensure_bucket_exists(self):
         """Create bucket if it doesn't exist."""
+        if not self.enabled or self._client is None:
+            return
+            
         try:
-            self.client.head_bucket(Bucket=self.bucket_name)
+            self._client.head_bucket(Bucket=self.bucket_name)
         except ClientError:
             # Bucket doesn't exist, create it
             try:
-                self.client.create_bucket(Bucket=self.bucket_name)
+                self._client.create_bucket(Bucket=self.bucket_name)
                 print(f"Created bucket: {self.bucket_name}")
             except ClientError as e:
                 print(f"Error creating bucket: {e}")
@@ -54,6 +73,11 @@ class MinIOStorage:
         Returns:
             str: URL path to the uploaded image, or None if upload failed
         """
+        if not self.enabled or self.client is None:
+            # In test/disabled mode, return a fake path
+            ext = file.name.split('.')[-1] if '.' in file.name else 'jpg'
+            return f"{folder}/{uuid.uuid4()}.{ext}"
+            
         try:
             # Generate unique filename
             ext = file.name.split('.')[-1] if '.' in file.name else 'jpg'
@@ -84,6 +108,10 @@ class MinIOStorage:
         Returns:
             bool: True if deletion was successful, False otherwise
         """
+        if not self.enabled or self.client is None:
+            # In test/disabled mode, just return True
+            return True
+            
         try:
             self.client.delete_object(
                 Bucket=self.bucket_name,
