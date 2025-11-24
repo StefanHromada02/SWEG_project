@@ -71,12 +71,12 @@ class PostSerializerTests(TestCase):
         post = serializer.save()
         self.assertIsInstance(post, Post)
         self.assertEqual(post.title, "Created Post")
-        self.assertEqual(post.user.id, self.user.id)
+        self.assertEqual(post.user, self.user.id)
 
     def test_serializer_output_format(self):
         """Test serializer output includes all expected fields."""
         post = Post.objects.create(
-            user=self.user,
+            user=self.user.id,
             title="Test Post",
             text="Test Content",
             image="posts/test.jpg"

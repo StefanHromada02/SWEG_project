@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from .managers import PostManager # Importiere den neuen Manager
 
 class Post(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
+    user = models.IntegerField()
     title = models.CharField(max_length=200)
     text = models.TextField()
     image = models.TextField()
@@ -12,4 +12,4 @@ class Post(models.Model):
     objects = PostManager()
 
     def __str__(self):
-        return f"{self.title} by {self.user.username}"
+        return f"{self.title} by user#{self.user}"

@@ -19,7 +19,7 @@ class PostViewSetTests(APITestCase):
 
         # Erstelle einen Test-Post
         cls.post = Post.objects.create(
-            user=cls.user,
+            user=cls.user.id,
             title="API Test Post",
             text="Inhalt für den API Test.",
             image="posts/test.jpg"
@@ -118,21 +118,21 @@ class PostSearchFilterTests(APITestCase):
         
         # Create test posts with different content
         cls.post1 = Post.objects.create(
-            user=cls.user1,
+            user=cls.user1.id,
             title="Django REST Framework Tutorial",
             text="Learn how to build REST APIs",
             image=""
         )
         time.sleep(0.01)  # Ensure different timestamps
         cls.post2 = Post.objects.create(
-            user=cls.user2,
+            user=cls.user2.id,
             title="Python Programming Guide",
             text="Complete guide to Python",
             image=""
         )
         time.sleep(0.01)
         cls.post3 = Post.objects.create(
-            user=cls.user1,
+            user=cls.user1.id,
             title="Docker Containers",
             text="Learn Docker and containerization",
             image=""
@@ -266,7 +266,7 @@ class PostImageUploadTests(APITestCase):
         """Test PUT with new image deletes old and uploads new."""
         # Create post with existing image
         post = Post.objects.create(
-            user=self.user,
+            user=self.user.id,
             title="Original",
             text="Text",
             image="posts/old-image.jpg"
@@ -301,8 +301,8 @@ class PostCustomActionsTests(APITestCase):
     def setUpTestData(cls):
         cls.user1 = User.objects.create_user(username='action_user1', password='pass123')
         cls.user2 = User.objects.create_user(username='action_user2', password='pass123')
-        cls.post1 = Post.objects.create(user=cls.user1, title="Post 1", text="Text 1")
-        cls.post2 = Post.objects.create(user=cls.user2, title="Post 2", text="Text 2")
+        cls.post1 = Post.objects.create(user=cls.user1.id, title="Post 1", text="Text 1")
+        cls.post2 = Post.objects.create(user=cls.user2.id, title="Post 2", text="Text 2")
 
     def test_my_posts_action(self):
         """Test custom my_posts action endpoint."""

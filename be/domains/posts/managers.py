@@ -6,9 +6,9 @@ class PostQuerySet(QuerySet):
     """QuerySet methods for Post model, to enable chaining."""
 
     def with_author(self):
-        """Pre-fetches the related User object."""
-        # Django's equivalent of SQLAlchemy's joinedload: select_related
-        return self.select_related('user')
+        """Returns queryset (user is IntegerField, not ForeignKey)."""
+        # Since user is IntegerField, we can't use select_related
+        return self
 
     def newest_first(self):
         """Orders posts by creation date, newest first."""
