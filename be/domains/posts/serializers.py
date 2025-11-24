@@ -1,15 +1,25 @@
 from rest_framework import serializers
 from .models import Post
+from domains.users.serializers import UserSerializer
+
 
 class PostSerializer(serializers.ModelSerializer):
     # Akzeptiert Upload von Bild-Dateien
     image_file = serializers.ImageField(write_only=True, required=False)
     # URL-Pfad wird automatisch gesetzt (read-only)
     image = serializers.CharField(read_only=True)
+    # Nested user details for read operations
+    user_details = UserSerializer(source='user', read_only=True)
+    # Comment count
+    comment_count = serializers.SerializerMethodField()
     
     class Meta:
         model = Post
-        fields = ["id", "user", "title", "text", "image", "image_file", "created_at"]
+        fields = ["id", "user", "user_details", "title", "text", "image", "image_file", "created_at", "comment_count"]
+        
+    def get_comment_count(self, obj):
+        """Return the number of comments for this post."""
+        return obj.comments.count()
         
     def validate_image_file(self, value):
         """Validiere Bildgröße und Format."""

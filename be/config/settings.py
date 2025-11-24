@@ -39,7 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "rest_framework",
     "drf_spectacular",
+    "domains.users",
     "domains.posts",
+    "domains.comments",
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,76 @@
+from rest_framework import viewsets, filters
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
+
+from .models import Comment
+from .serializers import CommentSerializer, CommentCreateSerializer
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing comments.
+    
+    Provides CRUD operations and filtering for comments.
+    """
+    queryset = Comment.objects.with_relations()
+    serializer_class = CommentSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['text', 'user__name']
+    ordering_fields = ['created_at']
+    ordering = ['-created_at']
+
+    def get_serializer_class(self):
+        """Use different serializer for create/update operations."""
+        if self.action in ['create', 'update', 'partial_update']:
+            return CommentCreateSerializer
+        return CommentSerializer
+
+    @extend_schema(
+        summary="Get comments for a specific post",
+        description="Returns all comments for the specified post ID",
+        parameters=[
+            OpenApiParameter(
+                name='post_id',
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.QUERY,
+                description='Post ID to filter comments'
+            )
+        ],
+        responses={200: CommentSerializer(many=True)}
+    )
+    @action(detail=False, methods=['get'])
+    def by_post(self, request):
+        """Get all comments for a specific post."""
+        post_id = request.query_params.get('post_id')
+        if not post_id:
+            return Response({"error": "post_id query parameter is required"}, status=400)
+        
+        comments = self.queryset.by_post(post_id)
+        serializer = self.get_serializer(comments, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        summary="Get comments by a specific user",
+        description="Returns all comments made by the specified user ID",
+        parameters=[
+            OpenApiParameter(
+                name='user_id',
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.QUERY,
+                description='User ID to filter comments'
+            )
+        ],
+        responses={200: CommentSerializer(many=True)}
+    )
+    @action(detail=False, methods=['get'])
+    def by_user(self, request):
+        """Get all comments by a specific user."""
+        user_id = request.query_params.get('user_id')
+        if not user_id:
+            return Response({"error": "user_id query parameter is required"}, status=400)
+        
+        comments = self.queryset.by_user(user_id)
+        serializer = self.get_serializer(comments, many=True)
+        return Response(serializer.data)
