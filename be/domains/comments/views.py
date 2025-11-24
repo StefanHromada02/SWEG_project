@@ -1,13 +1,21 @@
 from rest_framework import viewsets, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 
 from .models import Comment
 from .serializers import CommentSerializer, CommentCreateSerializer
 
 
+@extend_schema_view(
+    list=extend_schema(tags=['Comments']),
+    create=extend_schema(tags=['Comments']),
+    retrieve=extend_schema(tags=['Comments']),
+    update=extend_schema(tags=['Comments']),
+    partial_update=extend_schema(tags=['Comments']),
+    destroy=extend_schema(tags=['Comments'])
+)
 class CommentViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing comments.
@@ -28,6 +36,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         return CommentSerializer
 
     @extend_schema(
+        tags=['Comments'],
         summary="Get comments for a specific post",
         description="Returns all comments for the specified post ID",
         parameters=[
@@ -52,6 +61,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     @extend_schema(
+        tags=['Comments'],
         summary="Get comments by a specific user",
         description="Returns all comments made by the specified user ID",
         parameters=[

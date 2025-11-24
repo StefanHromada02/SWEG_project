@@ -1,10 +1,18 @@
 from rest_framework import viewsets, filters
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, extend_schema_view
 
 from .models import User
 from .serializers import UserSerializer
 
 
+@extend_schema_view(
+    list=extend_schema(tags=['Users']),
+    create=extend_schema(tags=['Users']),
+    retrieve=extend_schema(tags=['Users']),
+    update=extend_schema(tags=['Users']),
+    partial_update=extend_schema(tags=['Users']),
+    destroy=extend_schema(tags=['Users'])
+)
 class UserViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing users.

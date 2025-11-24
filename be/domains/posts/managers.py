@@ -19,3 +19,11 @@ class PostManager(models.Manager):
     """Custom Manager that uses the custom QuerySet."""
     def get_queryset(self):
         return PostQuerySet(self.model, using=self._db)
+    
+    def with_author(self):
+        """Pre-fetches the related User object."""
+        return self.get_queryset().with_author()
+    
+    def newest_first(self):
+        """Orders posts by creation date, newest first."""
+        return self.get_queryset().newest_first()

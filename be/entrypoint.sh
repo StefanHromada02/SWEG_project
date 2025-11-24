@@ -36,7 +36,7 @@ done
 
 # 1. Erstelle die Migrationsdateien (Bauplan), falls sie fehlen
 echo "Erstelle Migrationsdateien (falls nötig)..."
-python manage.py makemigrations posts
+python manage.py makemigrations
 
 # 2. Wende Datenbank-Migrationen an (erstellt die Tabellen)
 echo "Wende Datenbank-Migrationen an..."

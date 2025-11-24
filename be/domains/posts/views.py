@@ -2,13 +2,22 @@
 from rest_framework import viewsets, permissions, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 
 from .models import Post
 from .serializers import PostSerializer
 from services.minio_storage import minio_storage
 
+
+@extend_schema_view(
+    list=extend_schema(tags=['Posts']),
+    create=extend_schema(tags=['Posts']),
+    retrieve=extend_schema(tags=['Posts']),
+    update=extend_schema(tags=['Posts']),
+    partial_update=extend_schema(tags=['Posts']),
+    destroy=extend_schema(tags=['Posts'])
+)
 class PostViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing posts.
@@ -75,6 +84,7 @@ class PostViewSet(viewsets.ModelViewSet):
         instance.delete()
 
     @extend_schema(
+        tags=['Posts'],
         summary="Get user's posts",
         description="Returns all posts for the current user",
         responses={200: PostSerializer(many=True)}

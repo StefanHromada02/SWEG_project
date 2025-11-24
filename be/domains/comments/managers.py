@@ -26,3 +26,15 @@ class CommentManager(models.Manager):
     """Custom Manager that uses the custom QuerySet."""
     def get_queryset(self):
         return CommentQuerySet(self.model, using=self._db)
+    
+    def with_relations(self):
+        """Pre-fetches the related User and Post objects."""
+        return self.get_queryset().with_relations()
+    
+    def by_user(self, user_id):
+        """Filter comments by user."""
+        return self.get_queryset().by_user(user_id)
+    
+    def by_post(self, post_id):
+        """Filter comments by post."""
+        return self.get_queryset().by_post(post_id)
