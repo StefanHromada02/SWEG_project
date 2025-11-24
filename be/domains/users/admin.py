@@ -6,6 +6,7 @@ from .models import User
 class UserAdmin(admin.ModelAdmin):
     list_display = (
         "name",
+        "email",
         "study_program",
         "created_at"
     )
@@ -17,6 +18,7 @@ class UserAdmin(admin.ModelAdmin):
 
     search_fields = (
         "name",
+        "email",
         "study_program",
         "interests"
     )

@@ -5,6 +5,7 @@ from .managers import UserManager
 
 class User(models.Model):
     name = models.CharField(max_length=200)
+    email = models.EmailField(unique=True, help_text="Must end with @technikum-wien.at")
     study_program = models.CharField(max_length=200)
     interests = ArrayField(
         models.CharField(max_length=100),
