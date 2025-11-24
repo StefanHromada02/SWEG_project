@@ -10,6 +10,8 @@ class User(models.Model):
     interests = ArrayField(
         models.CharField(max_length=100),
         size=5,
+        blank=True,
+        default=list,
         help_text="List of interests, max 5"
     )
     created_at = models.DateTimeField(auto_now_add=True)

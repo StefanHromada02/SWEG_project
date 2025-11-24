@@ -297,6 +297,30 @@ git push origin feature/neue-funktion
 
 ## 🔗 Nützliche Befehle
 
+### Standard-Workflow (nach Code-Änderungen):
+1. Container neu bauen und starten
+docker-compose up -d --build
+
+2. Warten bis Container bereit sind
+Start-Sleep -Seconds 10
+
+3. Migrationen erstellen und anwenden
+docker exec -it social-media-backend python manage.py makemigrations
+docker exec -it social-media-backend python manage.py migrate
+### Bei Datenbank-Problemen
+1. Alles stoppen UND Datenbank löschen
+docker-compose down -v
+
+2. Neu bauen und starten
+docker-compose up -d --build
+
+3. Warten
+Start-Sleep -Seconds 15
+
+4. Migrationen
+docker exec -it social-media-backend python manage.py makemigrations
+docker exec -it social-media-backend python manage.py migrate
+
 ```bash
 # Container neu bauen
 docker-compose up --build
@@ -328,3 +352,5 @@ Entwickelt als Teil des SWEG Projekts.
 ## 📄 Lizenz
 
 Dieses Projekt ist für Bildungszwecke erstellt.
+
+
