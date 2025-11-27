@@ -40,20 +40,8 @@ jobs:
           python -m venv .venv
           .venv/bin/pip install --upgrade pip
           .venv/bin/pip install -r requirements.txt
-          .venv/bin/pip install pytest pytest-django flake8
+          .venv/bin/pip install pytest pytest-django flake8 psycopg2-binary
 
-      - name: Django migrate
-        working-directory: ./be/
-        env:
-          PYTHONPATH: .
-          DJANGO_SETTINGS_MODULE: config.settings
-          POSTGRES_HOST: db
-          POSTGRES_PORT: 5432
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: social_media_db
-        run: |
-          .venv/bin/python manage.py migrate --noinput
 
       - name: Lint
         working-directory: ./be/
@@ -65,19 +53,21 @@ jobs:
             --max-line-length=127 \
             --statistics
 
-      - name: Run tests
+      - name: Run tests (Postgres)
         working-directory: ./be/
         env:
           PYTHONPATH: .
           DJANGO_SETTINGS_MODULE: config.settings
 
-          POSTGRES_HOST: db
-          POSTGRES_PORT: 5432
+          DATABASE_HOST: db
+          DATABASE_PORT: 5432
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: social_media_db
 
           MINIO_ENDPOINT: minio:9000
+          MINIO_ROOT_USER: minio
+          MINIO_ROOT_PASSWORD: minio_admin
           MINIO_ACCESS_KEY: minio
           MINIO_SECRET_KEY: minio_admin
         run: |
