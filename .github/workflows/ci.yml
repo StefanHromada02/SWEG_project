@@ -17,8 +17,6 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: social_media_db
-        ports:
-          - "5432:5432"
         options: >-
           --health-cmd="pg_isready -U postgres -d social_media_db"
           --health-interval=5s --health-timeout=5s --health-retries=20
@@ -28,28 +26,15 @@ jobs:
       POSTGRES_PASSWORD: postgres
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
-      MINIO_ENDPOINT: localhost:9000
-      MINIO_ACCESS_KEY: minioadmin
-      MINIO_SECRET_KEY: minioadmin
-      MINIO_BUCKET: social-media-bucket
     defaults:
       run:
         working-directory: be
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-          cache: 'pip'
-          cache-dependency-path: be/requirements.txt
-
-      - name: Install dependencies
+      - name: Wait for Postgres to be ready
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install wait-for-it
+          ./wait-for-it.sh ${DATABASE_HOST}:${DATABASE_PORT} --timeout=60
+
 
       - name: Run Django tests
         run: |
