@@ -40,7 +40,20 @@ jobs:
           python -m venv .venv
           .venv/bin/pip install --upgrade pip
           .venv/bin/pip install -r requirements.txt
-          .venv/bin/pip install pytest flake8
+          .venv/bin/pip install pytest pytest-django flake8
+
+      - name: Django migrate
+        working-directory: ./be/
+        env:
+          PYTHONPATH: .
+          DJANGO_SETTINGS_MODULE: config.settings
+          POSTGRES_HOST: db
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: social_media_db
+        run: |
+          .venv/bin/python manage.py migrate --noinput
 
       - name: Lint
         working-directory: ./be/
@@ -56,6 +69,8 @@ jobs:
         working-directory: ./be/
         env:
           PYTHONPATH: .
+          DJANGO_SETTINGS_MODULE: config.settings
+
           POSTGRES_HOST: db
           POSTGRES_PORT: 5432
           POSTGRES_USER: postgres
