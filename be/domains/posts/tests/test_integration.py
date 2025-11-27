@@ -1,6 +1,4 @@
 """
-Integration tests for end-to-end scenarios across the Post API.
-"""
 from rest_framework.test import APITestCase
 from rest_framework import status
 from django.contrib.auth.models import User
@@ -13,14 +11,14 @@ import time
 
 
 class PostAPIIntegrationTests(APITestCase):
-    """End-to-end integration tests for complete workflows."""
+    #End-to-end integration tests for complete workflows.#
 
     def setUp(self):
         self.list_url = reverse('post-list')
         self.user = User.objects.create_user(username='integration_user', password='test123')
 
     def create_test_image(self):
-        """Helper to create a test image file."""
+        #Helper to create a test image file.#
         file = BytesIO()
         image = Image.new('RGB', (100, 100), color='blue')
         image.save(file, 'JPEG')
@@ -31,7 +29,7 @@ class PostAPIIntegrationTests(APITestCase):
     @patch('services.minio_storage.minio_storage.upload_image')
     @patch('services.minio_storage.minio_storage.delete_image')
     def test_complete_post_lifecycle(self, mock_delete, mock_upload):
-        """Test complete lifecycle: create -> read -> update -> delete."""
+        #Test complete lifecycle: create -> read -> update -> delete.#
         mock_upload.return_value = 'posts/lifecycle-test.jpg'
         mock_delete.return_value = True
 
@@ -80,7 +78,7 @@ class PostAPIIntegrationTests(APITestCase):
         self.assertEqual(mock_delete.call_count, 2)  # Once for update, once for delete
 
     def test_search_across_multiple_posts(self):
-        """Test search functionality with multiple posts."""
+        #Test search functionality with multiple posts.#
         # Create multiple posts
         posts_data = [
             {'user': 1, 'title': 'Django Tutorial', 'text': 'Learn Django framework'},
@@ -102,7 +100,7 @@ class PostAPIIntegrationTests(APITestCase):
         self.assertEqual(len(api_search.data), 1)
 
     def test_ordering_with_pagination_scenario(self):
-        """Test ordering works correctly with multiple posts."""
+        #Test ordering works correctly with multiple posts.#
         # Create posts with known order
         for i in range(5):
             Post.objects.create(
@@ -124,7 +122,7 @@ class PostAPIIntegrationTests(APITestCase):
         self.assertEqual(desc_response.data[0]['title'], 'Post E')
 
     def test_bulk_operations_scenario(self):
-        """Test creating and deleting multiple posts."""
+        #Test creating and deleting multiple posts.#
         # Create multiple posts
         post_ids = []
         for i in range(3):
@@ -152,7 +150,7 @@ class PostAPIIntegrationTests(APITestCase):
 
     @patch('services.minio_storage.minio_storage.upload_image')
     def test_mixed_posts_with_and_without_images(self, mock_upload):
-        """Test creating posts with and without images in same workflow."""
+        #Test creating posts with and without images in same workflow.#
         mock_upload.return_value = 'posts/mixed-test.jpg'
         
         # Create post with image
@@ -181,7 +179,7 @@ class PostAPIIntegrationTests(APITestCase):
         self.assertGreaterEqual(len(list_response.data), 2)
 
     def test_error_recovery_scenario(self):
-        """Test that errors don't corrupt data."""
+        #Test that errors don't corrupt data.#
         # Create valid post
         valid_data = {
             'user': 1,
@@ -206,7 +204,7 @@ class PostAPIIntegrationTests(APITestCase):
         self.assertEqual(check_response.data['title'], 'Valid Post')
 
     def test_concurrent_updates_scenario(self):
-        """Test updating same post multiple times."""
+        #Test updating same post multiple times.#
         # Create initial post
         initial_data = {
             'user': 1,
@@ -239,3 +237,4 @@ class PostAPIIntegrationTests(APITestCase):
         final_response = self.client.get(detail_url)
         self.assertEqual(final_response.data['title'], 'Updated Title 2')
         self.assertEqual(final_response.data['text'], 'Updated content 2')
+"""

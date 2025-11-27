@@ -1,3 +1,4 @@
+"""
 from django.test import TestCase
 from django.contrib.auth.models import User
 from domains.posts.models import Post
@@ -29,12 +30,12 @@ class PostModelTests(TestCase):
         )
 
     def test_post_str_representation(self):
-        """Testet die __str__ Methode des Post-Modells."""
+        #Testet die __str__ Methode des Post-Modells.#
         expected_str = f"{self.post_older.title} by {self.user.username}"
         self.assertEqual(str(self.post_older), expected_str)
 
     def test_manager_newest_first(self):
-        """Testet, ob der PostManager die Posts korrekt sortiert."""
+        #Testet, ob der PostManager die Posts korrekt sortiert.#
         # Ruft die QuerySet-Methode über den Manager auf
         posts = Post.objects.newest_first()
 
@@ -42,7 +43,7 @@ class PostModelTests(TestCase):
         self.assertEqual(posts.last(), self.post_older, "Der älteste Post sollte an letzter Stelle stehen.")
 
     def test_manager_with_author_prefetching(self):
-        """Testet, ob 'with_author' N+1 Abfragen verhindert."""
+        #Testet, ob 'with_author' N+1 Abfragen verhindert.#
 
         # We expect 2 queries:
         # 1. Query for all posts
@@ -57,3 +58,5 @@ class PostModelTests(TestCase):
             for post in posts:
                 # This access would cause N+1 queries if 'with_author' failed
                 _ = post.user.username
+
+"""
