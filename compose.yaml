@@ -31,21 +31,20 @@ services:
       - minio
 
   # -----------------------------------------------------------------
-  # ANGULAR FRONTEND (FE) - KORRIGIERT
+  # ANGULAR FRONTEND (FE)
   # -----------------------------------------------------------------
-#  frontend:
-#    build:
-#      context: ./fe
-#      dockerfile: Dockerfile
-#    container_name: social-media-frontend
-#    restart: always
-#    environment:
-#      # API_BASE_URL nutzt den Service-Namen des Backends
-#      API_BASE_URL: http://backend:8000/api
-#    ports:
-#      - "4200:80"
-#    depends_on:
-#      - backend  # 🚨 KORREKTUR: Muss auf den Service-Namen 'backend' warten
+  frontend:
+    build:
+      context: ./fe
+      dockerfile: Dockerfile
+    container_name: social-media-frontend
+    restart: always
+    environment:
+      API_BASE_URL: http://backend:8000/api
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
 
   # -----------------------------------------------------------------
   # POSTGRESQL DATABASE

@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
     "rest_framework",
     "drf_spectacular",
     "domains.users",
@@ -94,7 +95,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-if os.getenv('DJANGO_DB', '').lower() == 'sqlite' or os.getenv('CI', '').lower() == 'true':
+if os.getenv('DJANGO_DB', '').lower() == 'sqlite':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
