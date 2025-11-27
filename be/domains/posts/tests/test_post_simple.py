@@ -49,4 +49,4 @@ class PostSimpleTest(SimpleTestCase):
 
         mock_create_user.assert_called_once()
         mock_create_post.assert_called_once()
-        assertEqual(str(post), "Hello World by Alice")
+        self.assertEqual(str(post), "Hello World by Alice")
