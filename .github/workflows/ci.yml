@@ -1,0 +1,75 @@
+name: Backend CI (Unit Tests / Mocked)
+
+on:
+  pull_request:
+    branches: ['main']
+
+permissions:
+  contents: read
+
+jobs:
+  test_backend:
+    runs-on: ubuntu-latest
+    container: python:3.11-slim
+    services:
+      db:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd="pg_isready -U test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        ports:
+          - 5432:5432
+      minio:
+        image: minio/minio:RELEASE.2025-09-07T16-13-09Z
+        env:
+          MINIO_ROOT_USER: test
+          MINIO_ROOT_PASSWORD: testtest123
+        ports:
+          - 9000:9000
+          - 9001:9001
+        options: >-
+          --entrypoint=minio
+          server
+          /data
+          --console-address
+          ":9001"
+          --health-cmd="curl -f http://localhost:9000/minio/health/ready || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        working-directory: ./be/
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install -r requirements.txt
+          .venv/bin/pip install pytest pytest-django flake8
+
+      - name: Lint
+        working-directory: ./be/
+        run: |
+          # ... (Flake8 commands) ...
+
+      - name: Run unit tests (mocked)
+        working-directory: ./be/
+        env:
+          PYTHONPATH: .
+          DJANGO_SETTINGS_MODULE: config.settings
+          POSTGRES_HOST: localhost
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: testdb
+          MINIO_ENDPOINT: localhost:9000
+          MINIO_ACCESS_KEY: test
+          MINIO_SECRET_KEY: testtest123
+        run: |
+          .venv/bin/pytest
