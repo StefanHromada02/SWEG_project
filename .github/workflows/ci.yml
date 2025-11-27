@@ -39,13 +39,7 @@ jobs:
         ports:
           - 9000:9000
           - 9001:9001
-
-        name: Start MinIO
-        run: |
-          docker ps
-          docker exec ${{ job.services.minio.id }} sh -c \
-            "minio server /data --console-address ':9001' &"
-
+          -
     steps:
       - uses: actions/checkout@v4
 
