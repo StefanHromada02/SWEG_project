@@ -30,15 +30,11 @@ jobs:
         env:
           MINIO_ROOT_USER: minio
           MINIO_ROOT_PASSWORD: minio_admin
-        options: >-
-          --entrypoint "" 
-          minio server /data --console-address ":9001"
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Create venv & install dependencies
+      - name: Install dependencies
         working-directory: ./be/
         run: |
           python -m venv .venv
@@ -46,7 +42,7 @@ jobs:
           .venv/bin/pip install -r requirements.txt
           .venv/bin/pip install pytest flake8
 
-      - name: Lint with Flake8
+      - name: Lint
         working-directory: ./be/
         run: |
           .venv/bin/flake8 . \
@@ -56,7 +52,7 @@ jobs:
             --max-line-length=127 \
             --statistics
 
-      - name: Run pytest (unit + integration)
+      - name: Run tests
         working-directory: ./be/
         env:
           POSTGRES_HOST: db
