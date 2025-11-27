@@ -10,7 +10,6 @@ permissions:
 jobs:
   test_backend:
     runs-on: ubuntu-latest
-
     container: python:3.11-slim
 
     services:
@@ -30,8 +29,10 @@ jobs:
         image: minio/minio
         env:
           MINIO_ROOT_USER: minio
-          MINIO_ROOT_PASSWORD: minio
-        command: server /data --console-address ":9001"
+          MINIO_ROOT_PASSWORD: minio_admin
+        options: >-
+          --entrypoint "" 
+          minio server /data --console-address ":9001"
 
     steps:
       - name: Checkout code
