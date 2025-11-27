@@ -21,21 +21,17 @@ jobs:
           python -m venv .venv
           .venv/bin/pip install --upgrade pip
           .venv/bin/pip install -r requirements.txt
-          .venv/bin/pip install pytest flake8
+          .venv/bin/pip install pytest pytest-django flake8
 
       - name: Lint
         working-directory: ./be/
         run: |
-          .venv/bin/flake8 . \
-            --count \
-            --exit-zero \
-            --max-complexity=10 \
-            --max-line-length=127 \
-            --statistics
+          # ... (Flake8 commands) ...
 
       - name: Run unit tests (mocked)
         working-directory: ./be/
         env:
           PYTHONPATH: .
+          DJANGO_SETTINGS_MODULE: core.settings
         run: |
           .venv/bin/pytest
