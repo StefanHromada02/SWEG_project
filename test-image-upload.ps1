@@ -6,15 +6,40 @@ $baseUrl = "http://localhost:8000/api/posts/"
 
 Write-Host "`n=== MinIO IMAGE UPLOAD TEST ===" -ForegroundColor Green
 
-# Erstelle ein Test-Bild (1x1 Pixel PNG)
-$testImagePath = "$env:TEMP\test-post-image.png"
+# Option 1: Lade ein echtes Test-Bild von Picsum herunter
+$testImagePath = "$env:TEMP\test-post-image.jpg"
 
-# Base64 encoded 1x1 transparent PNG
-$base64Png = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
-$bytes = [Convert]::FromBase64String($base64Png)
-[IO.File]::WriteAllBytes($testImagePath, $bytes)
+Write-Host "Downloading test image..." -ForegroundColor Yellow
+Invoke-WebRequest -Uri "https://picsum.photos/800/600" -OutFile $testImagePath
+Write-Host "✅ Test image downloaded to: $testImagePath" -ForegroundColor Green
 
-Write-Host "`nTest image created at: $testImagePath" -ForegroundColor Yellow
+# Option 2: Alternativ kannst du einen eigenen Pfad angeben:
+# $testImagePath = "C:\Pfad\zu\deinem\bild.jpg"
+
+# ============================================================================
+# 1. Erstelle erst einen User (falls noch nicht vorhanden)
+# ============================================================================
+
+Write-Host "`n`n=== 0. CREATE USER (if needed) ===" -ForegroundColor Green
+
+$userBody = @{
+    username = "testuser"
+    email = "test@example.com"
+    password = "testpass123"
+} | ConvertTo-Json
+
+try {
+    $userResponse = Invoke-WebRequest -Uri "http://localhost:8000/api/users/" `
+        -Method POST `
+        -ContentType "application/json" `
+        -Body $userBody -ErrorAction SilentlyContinue
+    $userData = $userResponse.Content | ConvertFrom-Json
+    $userId = $userData.id
+    Write-Host "✅ User created with ID: $userId" -ForegroundColor Green
+} catch {
+    Write-Host "User might already exist, using ID: 1" -ForegroundColor Yellow
+    $userId = 1
+}
 
 # ============================================================================
 # 1. POST mit Bild-Upload (multipart/form-data)
@@ -22,35 +47,20 @@ Write-Host "`nTest image created at: $testImagePath" -ForegroundColor Yellow
 
 Write-Host "`n`n=== 1. CREATE POST WITH IMAGE UPLOAD ===" -ForegroundColor Green
 
-$boundary = [System.Guid]::NewGuid().ToString()
-$LF = "`r`n"
-
-# Multipart Form Data manuell erstellen
-$bodyLines = @(
-    "--$boundary",
-    "Content-Disposition: form-data; name=`"user`"$LF",
-    "1",
-    "--$boundary",
-    "Content-Disposition: form-data; name=`"title`"$LF",
-    "Post with MinIO Image Upload",
-    "--$boundary",
-    "Content-Disposition: form-data; name=`"text`"$LF",
-    "This post includes an image stored in MinIO object storage",
-    "--$boundary",
-    "Content-Disposition: form-data; name=`"image_file`"; filename=`"test-image.png`"",
-    "Content-Type: image/png$LF",
-    [System.Text.Encoding]::UTF8.GetString([IO.File]::ReadAllBytes($testImagePath)),
-    "--$boundary--$LF"
-)
-
-$body = $bodyLines -join $LF
-
 try {
     Write-Host "Uploading post with image..." -ForegroundColor Yellow
+    
+    # PowerShell 7+ Style mit -Form Parameter (einfacher!)
+    $formData = @{
+        user = $userId
+        title = "Post with MinIO Image Upload"
+        text = "This post includes an image stored in MinIO object storage"
+        image_file = Get-Item -Path $testImagePath
+    }
+    
     $response = Invoke-WebRequest -Uri $baseUrl `
         -Method POST `
-        -ContentType "multipart/form-data; boundary=$boundary" `
-        -Body $body
+        -Form $formData
     
     Write-Host "✅ Success! Response:" -ForegroundColor Green
     $responseData = $response.Content | ConvertFrom-Json
@@ -75,84 +85,19 @@ try {
     Write-Host ($postData | ConvertTo-Json -Depth 3) -ForegroundColor Cyan
     
     # ============================================================================
-    # 3. UPDATE Post mit neuem Bild
+    # 3. DELETE Post (und damit auch das Bild aus MinIO)
     # ============================================================================
     
-    Write-Host "`n`n=== 3. UPDATE POST WITH NEW IMAGE ===" -ForegroundColor Green
+    Write-Host "`n`n=== 3. DELETE POST (removes image from MinIO) ===" -ForegroundColor Green
     
-    $updateBoundary = [System.Guid]::NewGuid().ToString()
-    $updateBodyLines = @(
-        "--$updateBoundary",
-        "Content-Disposition: form-data; name=`"user`"$LF",
-        "1",
-        "--$updateBoundary",
-        "Content-Disposition: form-data; name=`"title`"$LF",
-        "UPDATED - Post with New Image",
-        "--$updateBoundary",
-        "Content-Disposition: form-data; name=`"text`"$LF",
-        "Updated post with a new image in MinIO",
-        "--$updateBoundary",
-        "Content-Disposition: form-data; name=`"image_file`"; filename=`"test-image-updated.png`"",
-        "Content-Type: image/png$LF",
-        [System.Text.Encoding]::UTF8.GetString([IO.File]::ReadAllBytes($testImagePath)),
-        "--$updateBoundary--$LF"
-    )
-    
-    $updateBody = $updateBodyLines -join $LF
-    
-    Write-Host "Updating post with new image..." -ForegroundColor Yellow
-    $updateResponse = Invoke-WebRequest -Uri "$baseUrl$postId/" `
-        -Method PUT `
-        -ContentType "multipart/form-data; boundary=$updateBoundary" `
-        -Body $updateBody
-    
-    Write-Host "✅ Updated! Response:" -ForegroundColor Green
-    $updatedData = $updateResponse.Content | ConvertFrom-Json
-    Write-Host ($updatedData | ConvertTo-Json -Depth 3) -ForegroundColor Cyan
-    
-    Write-Host "`nOld Image Path: $imagePath" -ForegroundColor Yellow
-    Write-Host "New Image Path: $($updatedData.image)" -ForegroundColor Green
-    
-    # ============================================================================
-    # 4. Erstelle Post OHNE Bild
-    # ============================================================================
-    
-    Write-Host "`n`n=== 4. CREATE POST WITHOUT IMAGE ===" -ForegroundColor Green
-    
-    $noImageBody = @{
-        user = 2
-        title = "Post without Image"
-        text = "This post has no image"
-    } | ConvertTo-Json
-    
-    $noImageResponse = Invoke-WebRequest -Uri $baseUrl `
-        -Method POST `
-        -ContentType "application/json" `
-        -Body $noImageBody
-    
-    Write-Host "✅ Created post without image:" -ForegroundColor Green
-    Write-Host $noImageResponse.Content -ForegroundColor Cyan
-    
-    # ============================================================================
-    # 5. Liste alle Posts
-    # ============================================================================
-    
-    Write-Host "`n`n=== 5. LIST ALL POSTS ===" -ForegroundColor Green
-    
-    $allPosts = Invoke-WebRequest -Uri $baseUrl
-    Write-Host $allPosts.Content -ForegroundColor Cyan
-    
-    # ============================================================================
-    # 6. Lösche Post (sollte auch Bild aus MinIO löschen)
-    # ============================================================================
-    
-    Write-Host "`n`n=== 6. DELETE POST (and image from MinIO) ===" -ForegroundColor Green
-    
-    Write-Host "Deleting post $postId..." -ForegroundColor Yellow
+    Write-Host "Deleting post ID: $postId..." -ForegroundColor Yellow
     $deleteResponse = Invoke-WebRequest -Uri "$baseUrl$postId/" -Method DELETE
     
-    Write-Host "✅ Post deleted! Status: $($deleteResponse.StatusCode)" -ForegroundColor Green
-    Write-Host "Image should also be removed from MinIO storage" -ForegroundColor Yellow
+    Write-Host "✅ Post deleted! Status Code: $($deleteResponse.StatusCode)" -ForegroundColor Green
+    Write-Host "Image should also be removed from MinIO bucket." -ForegroundColor Cyan
+    Write-Host ($updatedData | ConvertTo-Json -Depth 3) -ForegroundColor Cyan
+    
+
     
 } catch {
     Write-Host "❌ Error occurred:" -ForegroundColor Red

@@ -35,3 +35,13 @@ class PostSerializer(serializers.ModelSerializer):
             )
         
         return value
+    
+    def create(self, validated_data):
+        """Remove image_file from validated_data before creating Post."""
+        validated_data.pop('image_file', None)
+        return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
+        """Remove image_file from validated_data before updating Post."""
+        validated_data.pop('image_file', None)
+        return super().update(instance, validated_data)
