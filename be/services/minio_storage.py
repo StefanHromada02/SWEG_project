@@ -16,8 +16,8 @@ class MinIOStorage:
         # Configuration via env with sensible defaults
         # Default endpoint works in Docker Compose; override to localhost:9000 in CI/local as needed
         self.endpoint = os.getenv('MINIO_ENDPOINT', 'minio:9000')
-        self.access_key = os.getenv('MINIO_ACCESS_KEY', os.getenv('MINIO_ROOT_USER', 'minioadmin'))
-        self.secret_key = os.getenv('MINIO_SECRET_KEY', os.getenv('MINIO_ROOT_PASSWORD', 'minioadmin'))
+        self.access_key = os.getenv('MINIO_ACCESS_KEY', os.getenv('MINIO_ROOT_USER', 'minio'))
+        self.secret_key = os.getenv('MINIO_SECRET_KEY', os.getenv('MINIO_ROOT_PASSWORD', 'minio_admin'))
         self.bucket_name = os.getenv('MINIO_BUCKET', 'social-media-bucket')
 
         self.client = None  # created lazily

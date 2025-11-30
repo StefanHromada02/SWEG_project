@@ -1,5 +1,4 @@
+<app-new-post-modal (created)="onCreated()"></app-new-post-modal>
 @for (post of posts$ | async; track post.id) {
-  <div>
     <app-post [post]="post"></app-post>
-  </div>
 }

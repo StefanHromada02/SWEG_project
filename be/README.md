@@ -58,8 +58,8 @@ POSTGRES_PASSWORD=your_secure_password
 POSTGRES_DB=social_media_db
 
 # MinIO
-MINIO_ROOT_USER=minioadmin
-MINIO_ROOT_PASSWORD=minioadmin123
+MINIO_ROOT_USER=minio
+MINIO_ROOT_PASSWORD=minio_admin
 ```
 
 2. **Starte alle Services:**
