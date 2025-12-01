@@ -17,9 +17,9 @@ jobs:
       db:
         image: postgres:15-alpine
         env:
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-          POSTGRES_DB: testdb
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: social_media_db
         options: >-
           --health-cmd="pg_isready -U test"
           --health-interval=10s
@@ -29,10 +29,10 @@ jobs:
           - 5432:5432
 
       minio:
-        image: minio/minio:latest
+        image: bitnami/minio:latest
         env:
-          MINIO_ROOT_USER: test
-          MINIO_ROOT_PASSWORD: testtest123
+          MINIO_ROOT_USER: minio
+          MINIO_ROOT_PASSWORD: minio_admin
         ports:
           - 9000:9000
           - 9001:9001

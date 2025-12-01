@@ -9,11 +9,23 @@ module.exports = function (config) {
       require('karma-coverage'),
       require('@angular-devkit/build-angular/plugins/karma')
     ],
-
-    port: 9876,
-    colors: true,
-    logLevel: config.LOG_INFO,
-    autoWatch: true,
+    client: {
+      jasmine: {
+      },
+      clearContext: false
+    },
+    jasmineHtmlReporter: {
+      suppressAll: true
+    },
+    coverageReporter: {
+      dir: require('path').join(__dirname, './coverage/app'),
+      subdir: '.',
+      reporters: [
+        { type: 'html' },
+        { type: 'text-summary' }
+      ]
+    },
+    reporters: ['progress', 'kjhtml'],
 
     customLaunchers: {
       ChromeHeadlessCI: {
@@ -27,8 +39,11 @@ module.exports = function (config) {
       }
     },
 
-    browsers: ['Chrome', 'ChromeHeadlessCI'],
-
+    port: 9876,
+    colors: true,
+    logLevel: config.LOG_INFO,
+    autoWatch: true,
+    browsers: ['Chrome'],
     singleRun: false,
     restartOnFileChange: true
   });
