@@ -34,11 +34,12 @@ jobs:
           - 9000:9000
           - 9001:9001
         options: >-
-          --health-cmd="curl -f http://localhost:9000/minio/health/ready || exit 1"
+          --entrypoint=/bin/sh
+          -c "minio server /data --console-address ':9001'"
+          --health-cmd='curl -f http://localhost:9000/minio/health/ready || exit 1'
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
-          -c "minio server /data --console-address ':9001'"
     steps:
       - uses: actions/checkout@v4
 
