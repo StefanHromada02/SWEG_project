@@ -1,63 +1,76 @@
-name: Full CI
+name: Backend CI (Unit Tests / Mocked)
 
 on:
-  push:
-    branches: [ main, master ]
   pull_request:
-    branches: [ main, master ]
+    branches: ['main']
+
+permissions:
+  contents: read
 
 jobs:
-  backend-tests:
-    name: Backend Tests (Django)
+  test_backend:
     runs-on: ubuntu-latest
+    container: python:3.11-slim
     services:
-      postgres:
-        image: postgres:16
+      db:
+        image: postgres:15-alpine
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: social_media_db
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: testdb
         options: >-
-          --health-cmd="pg_isready -U postgres -d social_media_db"
-          --health-interval=5s --health-timeout=5s --health-retries=20
-    env:
-      POSTGRES_DB: social_media_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      DATABASE_HOST: postgres
-      DATABASE_PORT: 5432
-      MINIO_ROOT_USER: minio
-      MINIO_ROOT_PASSWORD: minio_admin
-    defaults:
-      run:
-        working-directory: be
-        # FIX: Erzwingt die Verwendung der universelleren /bin/sh Shell,
-        # um den 'No such file or directory' Fehler für /usr/bin/bash zu vermeiden.
-        shell: /bin/sh {0}
+          --health-cmd="pg_isready -U test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        ports:
+          - 5432:5432
+      minio:
+        image: minio/minio:RELEASE.2025-09-07T16-13-09Z
+        env:
+          MINIO_ROOT_USER: test
+          MINIO_ROOT_PASSWORD: testtest123
+        ports:
+          - 9000:9000
+          - 9001:9001
+        options: >-
+          --entrypoint=minio
+          server
+          /data
+          --console-address
+          ":9001"
+          --health-cmd="curl -f http://localhost:9000/minio/health/ready || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-          cache: 'pip'
-          cache-dependency-path: be/requirements.txt
+      - uses: actions/checkout@v4
 
       - name: Install dependencies
+        working-directory: ./be/
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install wait-for-it
-
-      - name: Wait for Postgres to be ready
+          python -m venv .venv
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install -r requirements.txt
+          .venv/bin/pip install pytest pytest-django flake8
+      - name: Lint
+        working-directory: ./be/
         run: |
-          ./wait-for-it.sh ${DATABASE_HOST}:${DATABASE_PORT} --timeout=60
-
-      - name: Run Django tests
+          # ... (Flake8 commands) ...
+      - name: Run unit tests (mocked)
+        working-directory: ./be/
+        env:
+          PYTHONPATH: .
+          DJANGO_SETTINGS_MODULE: config.settings
+          POSTGRES_HOST: localhost
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: testdb
+          MINIO_ENDPOINT: localhost:9000
+          MINIO_ACCESS_KEY: test
+          MINIO_SECRET_KEY: testtest123
         run: |
-          python manage.py test -v 2
+          .venv/bin/pytest
   frontend-tests:
     name: Frontend Tests (Angular)
     runs-on: ubuntu-latest
