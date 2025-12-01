@@ -1,0 +1,25 @@
+.post-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  width: 600px;
+  margin: 20px auto; /* Zentrierung */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease-in-out;
+}
+
+
+.post-card:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.post-image {
+  max-height: 400px;
+  object-fit: cover; /* Stellt sicher, dass das Bild den Container ausfüllt */
+  width: 100%;
+}
+
+.post-text {
+  white-space: pre-wrap; /* Behält Formatierungen bei */
+}

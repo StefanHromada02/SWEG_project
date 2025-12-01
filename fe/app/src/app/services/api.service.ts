@@ -1,0 +1,38 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { backendUrl } from '../../environments';
+import { PostModel } from '../models/post.model';
+
+@Injectable({
+  providedIn: 'root'
+})
+export class ApiService {
+  private readonly baseUrl: string = backendUrl.apiUrl;
+
+  constructor(private readonly http: HttpClient) {}
+
+  getPostsForUniversity(University: string): Observable<any> {
+    // Backend currently ignores university filter; adjust when BE supports it
+    return this.http.get(`${this.baseUrl}/posts/`);
+  }
+
+  // Use the typed PostModel for creating a post; optionally attach an image file
+  createPost(post: Partial<PostModel>, imageFile?: File): Observable<any> {
+    const formData = new FormData();
+    // Backend expects 'user' not 'userId'
+    if (post.userId !== undefined && post.userId !== null) {
+      formData.append('user', String(post.userId));
+    }
+    if (post.title) {
+      formData.append('title', post.title);
+    }
+    if (post.text) {
+      formData.append('text', post.text);
+    }
+    if (imageFile) {
+      formData.append('image_file', imageFile);
+    }
+    return this.http.post(`${this.baseUrl}/posts/`, formData);
+  }
+}

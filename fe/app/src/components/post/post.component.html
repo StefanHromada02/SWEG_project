@@ -1,0 +1,27 @@
+<mat-card class="post-card">
+  <mat-card-header>
+    <mat-card-title>{{ post.title }}</mat-card-title>
+    <mat-card-subtitle>{{ post.userId }} | {{ formattedDate }}</mat-card-subtitle>
+  </mat-card-header>
+
+  @if (post.image) {
+    <img
+      mat-card-image
+      [src]="environment.minioUrl + '/' + post.image"
+      class="post-image"
+    />
+  }
+
+  <mat-card-content>
+    <p class="post-text">
+      {{ post.text }}
+    </p>
+  </mat-card-content>
+
+  <mat-card-actions align="end">
+    <button matIconButton (click)="onLike()" aria-label="Like Post">
+      <mat-icon>favorite_border</mat-icon>
+    </button>
+    <button matButton color="primary">Kommentieren</button>
+  </mat-card-actions>
+</mat-card>

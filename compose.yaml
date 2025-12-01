@@ -11,14 +11,25 @@ services:
     container_name: social-media-backend
     restart: always
     environment:
+      # WICHTIG: Der Hostname für die interne DB-Verbindung ist immer der Service-Name 'db'
       POSTGRES_HOST: db
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+
+      # Zusammengesetzte URL (falls in settings.py verwendet)
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+
       MINIO_ENDPOINT: minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       PORT: 8000
+
+      # Default Admin User (created on container start)
+      DJANGO_CREATE_SUPERUSER: ${DJANGO_CREATE_SUPERUSER:-true}
+      DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME:-admin}
+      DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL:-admin@example.com}
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD:-admin123}
     ports:
       - "8000:8000"
     depends_on:
@@ -35,7 +46,7 @@ services:
     container_name: social-media-frontend
     restart: always
     environment:
-      API_BASE_URL: http://backend:8000/api 
+      API_BASE_URL: http://backend:8000/api
     ports:
       - "4200:80"
     depends_on:
@@ -61,18 +72,18 @@ services:
   # MINIO OBJECT STORAGE
   # -----------------------------------------------------------------
   minio:
-    image: minio/minio
+    build:
+      context: ./minio
+      dockerfile: Dockerfile
     container_name: social-media-minio
-    restart: always
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
     volumes:
       - minio_data:/data
-    ports:
-      - "9000:9000" # MinIO API
-      - "9001:9001" # MinIO Konsole (Web-UI)
-    command: server /data --console-address ":9001"
 
 volumes:
   db_data:

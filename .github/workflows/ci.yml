@@ -1,0 +1,121 @@
+name: Backend CI (Unit Tests / Mocked)
+
+on:
+  pull_request:
+    branches: ['main']
+
+permissions:
+  contents: read
+
+jobs:
+  test_backend:
+    name: Backend Tests (Python/Django)
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: social_media_db
+        options: >-
+          --health-cmd="pg_isready -U postgres" 
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        ports:
+          - 5432:5432
+
+      minio:
+        image: minio/minio:latest
+        env:
+          MINIO_ROOT_USER: minio
+          MINIO_ROOT_PASSWORD: minio_admin
+        ports:
+          - 9000:9000
+          - 9001:9001
+        options: >-
+          --name minio-service
+          --entrypoint sh
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+
+      - name: Install dependencies
+        working-directory: ./be/
+        run: |
+          python -m venv .venv
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install -r requirements.txt
+          .venv/bin/pip install pytest pytest-django flake8
+
+      - name: Lint
+        working-directory: ./be/
+        run: |
+          echo "Linting placeholder"
+
+      - name: Run unit tests (mocked)
+        working-directory: ./be/
+        env:
+          PYTHONPATH: .
+          DJANGO_SETTINGS_MODULE: config.settings
+          POSTGRES_HOST: localhost
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: social_media_db
+          MINIO_ENDPOINT: localhost:9000
+          MINIO_ACCESS_KEY: minio
+          MINIO_SECRET_KEY: minio_admin
+        run: |
+          sleep 5 
+          .venv/bin/pytest
+
+  frontend-tests:
+    name: Frontend Tests (Angular)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: fe/app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache npm
+        if: ${{ hashFiles('fe/app/package-lock.json') != '' }}
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('fe/app/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install Chrome
+        id: setup-chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm i; fi
+
+      - name: Run unit tests (headless)
+        env:
+          CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
+          CI: true
+        run: |
+          npx ng test --karma-config=./karma.conf.js --watch=false --browsers=ChromeHeadlessCI --code-coverage
+
+      - name: Build frontend
+        run: npm run build --if-present
