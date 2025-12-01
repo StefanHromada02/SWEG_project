@@ -38,7 +38,7 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
-          --entrypoint sh -c "minio server /data --console-address ':9001'"
+          --entrypoint sh -- -c "minio server /data --console-address ':9001'"
     steps:
       - uses: actions/checkout@v4
 
@@ -94,7 +94,7 @@ jobs:
       - name: Install Headless Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libnss3 libgconf-2-4 libfontconfig libgbm-dev
+          sudo apt-get install -y libnss3 libfontconfig libgbm-dev
 
       - name: Install Chrome
         id: setup-chrome
