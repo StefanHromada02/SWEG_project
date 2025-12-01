@@ -10,8 +10,7 @@ module.exports = function (config) {
       require('@angular-devkit/build-angular/plugins/karma')
     ],
     client: {
-      jasmine: {
-      },
+      jasmine: {},
       clearContext: false
     },
     jasmineHtmlReporter: {
@@ -33,18 +32,17 @@ module.exports = function (config) {
         flags: [
           '--no-sandbox',
           '--disable-gpu',
-          '--disable-dev-shm-usage'
+          '--disable-dev-shm-usage',
+          '--ignore-certificate-errors'
         ]
       }
     },
-
 
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
-
-    browsers: ['Chrome', 'ChromeHeadlessCI'],
+    browsers: ['Chrome'],
     singleRun: false,
     restartOnFileChange: true
   });
