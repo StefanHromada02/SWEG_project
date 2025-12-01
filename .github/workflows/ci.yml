@@ -34,12 +34,11 @@ jobs:
           - 9000:9000
           - 9001:9001
         options: >-
-          --entrypoint=/bin/sh
-          -c "minio server /data --console-address ':9001'"
           --health-cmd='curl -f http://localhost:9000/minio/health/ready || exit 1'
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
+          --entrypoint sh -c "minio server /data --console-address ':9001'"
     steps:
       - uses: actions/checkout@v4
 
@@ -105,7 +104,7 @@ jobs:
           CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
           CI: true
         run: |
-          npx ng test --watch=false --browsers=ChromeHeadless --code-coverage --no-sandbox
+          npx ng test --watch=false --browsers=ChromeHeadless --code-coverage
 
       - name: Build frontend
         run: npm run build --if-present
