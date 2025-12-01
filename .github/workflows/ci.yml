@@ -34,7 +34,7 @@ jobs:
           - 9000:9000
           - 9001:9001
         options: >-
-          --health-cmd='curl -f http://localhost:9000/minio/health/ready || exit 1'
+          --health-cmd="curl -f http://localhost:9000/minio/health/ready || exit 1"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -90,6 +90,11 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('fe/app/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
+
+      - name: Install Headless Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libnss3 libgconf-2-4 libfontconfig libgbm-dev
 
       - name: Install Chrome
         id: setup-chrome
