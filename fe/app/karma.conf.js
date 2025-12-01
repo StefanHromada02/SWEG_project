@@ -28,19 +28,23 @@ module.exports = function (config) {
     reporters: ['progress', 'kjhtml'],
 
     customLaunchers: {
-      customLaunchers: {
-        ChromeHeadlessCI: {
-          base: 'ChromeHeadless',
-          flags: ['--no-sandbox', '--disable-gpu']
-        }
-      },
+      ChromeHeadlessCI: {
+        base: 'ChromeHeadless',
+        flags: [
+          '--no-sandbox',
+          '--disable-gpu',
+          '--disable-dev-shm-usage'
+        ]
+      }
     },
+
 
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
-    browsers: ['Chrome', 'ChromeHeadlessCI'],
+
+    browsers: ['Chrome'],
     singleRun: false,
     restartOnFileChange: true
   });
