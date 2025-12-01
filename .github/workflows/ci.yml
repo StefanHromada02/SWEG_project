@@ -58,44 +58,44 @@ jobs:
       - name: Run Django tests
         run: |
           python manage.py test -v 2
-#  frontend-tests:
-#    name: Frontend Tests (Angular)
-#    runs-on: ubuntu-latest
-#    defaults:
-#      run:
-#        working-directory: fe/app
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v4
-#
-#      - name: Setup Node.js
-#        uses: actions/setup-node@v4
-#        with:
-#          node-version: '20'
-#
-#      - name: Cache npm (if lockfile exists)
-#        if: ${{ hashFiles('fe/app/package-lock.json') != '' }}
-#        uses: actions/cache@v4
-#        with:
-#          path: ~/.npm
-#          key: ${{ runner.os }}-node-${{ hashFiles('fe/app/package-lock.json') }}
-#          restore-keys: |
-#            ${{ runner.os }}-node-
-#
-#      - name: Install Chrome
-#        id: setup-chrome
-#        uses: browser-actions/setup-chrome@v1
-#
-#      - name: Install dependencies
-#        run: |
-#          if [ -f package-lock.json ]; then npm ci; else npm i; fi
-#
-#      - name: Run unit tests (headless)
-#        env:
-#          CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
-#          CI: true
-#        run: |
-#          npx ng test --watch=false --browsers=ChromeHeadless --code-coverage
-#
-#      - name: Build frontend
-#        run: npm run build --if-present
+  frontend-tests:
+    name: Frontend Tests (Angular)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: fe/app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache npm (if lockfile exists)
+        if: ${{ hashFiles('fe/app/package-lock.json') != '' }}
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('fe/app/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install Chrome
+        id: setup-chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Install dependencies
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm i; fi
+
+      - name: Run unit tests (headless)
+        env:
+          CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
+          CI: true
+        run: |
+          npx ng test --watch=false --browsers=ChromeHeadless --code-coverage
+
+      - name: Build frontend
+        run: npm run build --if-present
