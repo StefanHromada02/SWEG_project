@@ -11,7 +11,7 @@ jobs:
   test_backend:
     name: Backend Tests (Python/Django)
     runs-on: ubuntu-latest
-    container: python:3.11-slim
+
     services:
       db:
         image: postgres:15-alpine
