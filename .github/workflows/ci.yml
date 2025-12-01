@@ -9,8 +9,10 @@ permissions:
 
 jobs:
   test_backend:
+    name: Backend Tests (Python/Django)
     runs-on: ubuntu-latest
     container: python:3.11-slim
+
     services:
       db:
         image: postgres:15-alpine
@@ -25,6 +27,7 @@ jobs:
           --health-retries=5
         ports:
           - 5432:5432
+
       minio:
         image: minio/minio:latest
         env:
@@ -38,7 +41,7 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
-          --entrypoint sh -- -c "minio server /data --console-address ':9001'"
+
     steps:
       - uses: actions/checkout@v4
 
@@ -49,24 +52,29 @@ jobs:
           .venv/bin/pip install --upgrade pip
           .venv/bin/pip install -r requirements.txt
           .venv/bin/pip install pytest pytest-django flake8
+
       - name: Lint
         working-directory: ./be/
         run: |
-          # ... (Flake8 commands) ...
+          # Beispielkonfiguration für Flake8, falls benötigt:
+          # .venv/bin/flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          echo "Linting placeholder"
+
       - name: Run unit tests (mocked)
         working-directory: ./be/
         env:
           PYTHONPATH: .
           DJANGO_SETTINGS_MODULE: config.settings
-          POSTGRES_HOST: localhost
+          POSTGRES_HOST: db
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test
           POSTGRES_DB: testdb
-          MINIO_ENDPOINT: localhost:9000
-          MINIO_ACCESS_KEY: test
-          MINIO_SECRET_KEY: testtest123
+          MINIO_ENDPOINT: minio:9000
+          MINIO_ACCESS_KEY: minio
+          MINIO_SECRET_KEY: minio_admin
         run: |
           .venv/bin/pytest
+
   frontend-tests:
     name: Frontend Tests (Angular)
     runs-on: ubuntu-latest
@@ -82,7 +90,7 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Cache npm (if lockfile exists)
+      - name: Cache npm
         if: ${{ hashFiles('fe/app/package-lock.json') != '' }}
         uses: actions/cache@v4
         with:
@@ -109,7 +117,7 @@ jobs:
           CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
           CI: true
         run: |
-          npx ng test --watch=false --browsers=ChromeHeadless --code-coverage
+          npx ng test --watch=false --browsers=ChromeHeadlessCI --code-coverage
 
       - name: Build frontend
         run: npm run build --if-present
