@@ -32,8 +32,7 @@ module.exports = function (config) {
         ChromeHeadlessCI: {
           base: 'ChromeHeadless',
           flags: [
-            '--no-sandbox',
-            '--disable-gpu'
+            '--no-sandbox'
           ]
         }
       },
@@ -43,7 +42,7 @@ module.exports = function (config) {
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
-    browsers: ['Chrome'],
+    browsers: ['Chrome', 'ChromeHeadlessCI'],
     singleRun: false,
     restartOnFileChange: true
   });

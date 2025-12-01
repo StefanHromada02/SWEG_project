@@ -11,7 +11,6 @@ jobs:
   test_backend:
     name: Backend Tests (Python/Django)
     runs-on: ubuntu-latest
-    container: python:3.11-slim
 
     services:
       db:
@@ -21,7 +20,7 @@ jobs:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: social_media_db
         options: >-
-          --health-cmd="pg_isready -U test"
+          --health-cmd="pg_isready -U postgres" 
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -29,7 +28,7 @@ jobs:
           - 5432:5432
 
       minio:
-        image: bitnami/minio:latest
+        image: minio/minio:latest
         env:
           MINIO_ROOT_USER: minio
           MINIO_ROOT_PASSWORD: minio_admin
@@ -37,10 +36,8 @@ jobs:
           - 9000:9000
           - 9001:9001
         options: >-
-          --health-cmd="curl -f http://localhost:9000/minio/health/ready || exit 1"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+          --name minio-service
+          --entrypoint sh
 
     steps:
       - uses: actions/checkout@v4
@@ -51,25 +48,6 @@ jobs:
           python-version: '3.11'
           cache: 'pip'
 
-      - name: Start MinIO
-        run: |
-          docker run -d \
-            -p 9000:9000 \
-            -p 9001:9001 \
-            --name minio \
-            -e MINIO_ROOT_USER=test \
-            -e MINIO_ROOT_PASSWORD=testtest123 \
-            minio/minio:latest server /data --console-address ":9001"
-          
-          # Kurz warten, bis MinIO bereit ist
-          echo "Waiting for MinIO..."
-          for i in {1..30}; do
-            if curl -s http://localhost:9000/minio/health/ready; then
-              echo "MinIO is up!"
-              break
-            fi
-            sleep 1
-          done
 
       - name: Install dependencies
         working-directory: ./be/
@@ -89,14 +67,15 @@ jobs:
         env:
           PYTHONPATH: .
           DJANGO_SETTINGS_MODULE: config.settings
-          POSTGRES_HOST: db
+          POSTGRES_HOST: localhost
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: social_media_db
-          MINIO_ENDPOINT: minio:9000
+          MINIO_ENDPOINT: localhost:9000
           MINIO_ACCESS_KEY: minio
           MINIO_SECRET_KEY: minio_admin
         run: |
+          sleep 5 
           .venv/bin/pytest
 
   frontend-tests:
@@ -123,11 +102,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - name: Install Headless Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libnss3 libfontconfig libgbm-dev libatk-bridge2.0-0
-
       - name: Install Chrome
         id: setup-chrome
         uses: browser-actions/setup-chrome@v1
@@ -141,7 +115,7 @@ jobs:
           CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
           CI: true
         run: |
-          npx ng test --watch=false --browsers=ChromeHeadlessCI --code-coverage
+          npx ng test --watch=false --browsers=ChromeHeadless --code-coverage
 
       - name: Build frontend
         run: npm run build --if-present
