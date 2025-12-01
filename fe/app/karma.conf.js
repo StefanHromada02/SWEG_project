@@ -28,15 +28,15 @@ module.exports = function (config) {
     reporters: ['progress', 'kjhtml'],
 
     customLaunchers: {
-      ChromeHeadlessCI: {
-        base: 'ChromeHeadless',
-        flags: [
-          '--no-sandbox',
-          '--disable-gpu',
-          '--disable-translate',
-          '--disable-extensions'
-        ]
-      }
+      customLaunchers: {
+        ChromeHeadlessCI: {
+          base: 'ChromeHeadless',
+          flags: [
+            '--no-sandbox',
+            '--disable-gpu'
+          ]
+        }
+      },
     },
 
     port: 9876,
