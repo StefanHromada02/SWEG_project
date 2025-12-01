@@ -123,6 +123,7 @@ jobs:
           node-version: '20'
 
       - name: Cache npm
+        if: ${{ hashFiles('fe/app/package-lock.json') != '' }}
         uses: actions/cache@v4
         with:
           path: ~/.npm
@@ -131,6 +132,7 @@ jobs:
             ${{ runner.os }}-node-
 
       - name: Install Chrome
+        id: setup-chrome
         uses: browser-actions/setup-chrome@v1
 
       - name: Install dependencies
