@@ -26,7 +26,7 @@ jobs:
         ports:
           - 5432:5432
       minio:
-        image: minio/minio:RELEASE.2025-09-07T16-13-09Z
+        image: minio/minio:latest
         env:
           MINIO_ROOT_USER: test
           MINIO_ROOT_PASSWORD: testtest123
@@ -94,7 +94,7 @@ jobs:
       - name: Install Headless Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libnss3 libfontconfig libgbm-dev
+          sudo apt-get install -y libnss3 libfontconfig libgbm-dev libatk-bridge2.0-0
 
       - name: Install Chrome
         id: setup-chrome
