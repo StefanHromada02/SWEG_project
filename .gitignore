@@ -139,3 +139,6 @@ Thumbs.db
 
 # Project specific
 be/posts.db
+/fe/app/node_modules/*
+/fe/app/dist/*
+/fe/app/.angular/*

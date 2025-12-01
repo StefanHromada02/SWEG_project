@@ -27,7 +27,7 @@ jobs:
       DATABASE_HOST: postgres
       DATABASE_PORT: 5432
       MINIO_ROOT_USER: minio
-      MINIO_ROOT_PASSWORD: mino_admin
+      MINIO_ROOT_PASSWORD: minio_admin
     defaults:
       run:
         working-directory: be

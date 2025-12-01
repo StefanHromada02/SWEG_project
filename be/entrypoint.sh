@@ -4,7 +4,6 @@
 set -e
 
 # Erhalte die DB-Variablen aus der Docker-Umgebung
-# (Stellen Sie sicher, dass sie in docker-compose.yml im 'backend' environment definiert sind)
 DB_HOST=${POSTGRES_HOST:-db}
 DB_PORT=${POSTGRES_PORT:-5432}
 DB_USER=${POSTGRES_USER:-postgres}
@@ -14,7 +13,6 @@ DB_NAME=${POSTGRES_DB:-social_media_db}
 echo "Warte auf die PostgreSQL-Datenbank unter $DB_HOST:$DB_PORT..."
 
 # Python-Skript zum Warten auf die DB
-# Wir verwenden 'until' anstelle von 'while'
 until python -c "import sys, os, psycopg2
 try:
     conn = psycopg2.connect(
@@ -36,12 +34,15 @@ done
 
 # 1. Erstelle die Migrationsdateien (Bauplan), falls sie fehlen
 echo "Erstelle Migrationsdateien (falls nötig)..."
+# Führt makemigrations aus, falls neue Modelle/Felder erkannt werden.
 python manage.py makemigrations
 
-# 2. Wende Datenbank-Migrationen an (erstellt die Tabellen)
+# 2. Wende Datenbank-Migrationen an (erstellt Tabellen UND führt Data Migration aus)
 echo "Wende Datenbank-Migrationen an..."
+# Dies wendet alle Migrationen an, einschließlich der Superuser-Erstellung.
 python manage.py migrate --noinput
 
 # 3. Starte den Django-Server
 echo "Starte Django-Server..."
+# Führt den Standard-Befehl des Containers aus (oft runserver)
 exec "$@"

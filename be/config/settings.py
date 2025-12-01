@@ -117,7 +117,7 @@ else:
 # --- Zusätzliche Anpassungen für MinIO (Medien-Dateien) ---
 
 AWS_ACCESS_KEY_ID = 'minio'           # MINIO_ROOT_USER
-AWS_SECRET_ACCESS_KEY = 'mino_admin'  # MINIO_ROOT_PASSWORD
+AWS_SECRET_ACCESS_KEY = 'minio_admin'  # MINIO_ROOT_PASSWORD
 
 # Bucket Name (Wird in MinIO erstellt)
 AWS_STORAGE_BUCKET_NAME = 'social-media-bucket'

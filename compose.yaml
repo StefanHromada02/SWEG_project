@@ -24,6 +24,12 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       PORT: 8000
+
+      # Default Admin User (created on container start)
+      DJANGO_CREATE_SUPERUSER: ${DJANGO_CREATE_SUPERUSER:-true}
+      DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME:-admin}
+      DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL:-admin@example.com}
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD:-admin123}
     ports:
       - "8000:8000"
     depends_on:
@@ -66,18 +72,18 @@ services:
   # MINIO OBJECT STORAGE
   # -----------------------------------------------------------------
   minio:
-    image: minio/minio
+    build:
+      context: ./minio
+      dockerfile: Dockerfile
     container_name: social-media-minio
-    restart: always
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
     volumes:
       - minio_data:/data
-    ports:
-      - "9000:9000" # MinIO API
-      - "9001:9001" # MinIO Konsole (Web-UI)
-    command: server /data --console-address ":9001"
 
 volumes:
   db_data:
