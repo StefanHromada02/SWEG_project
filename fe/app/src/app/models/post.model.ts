@@ -1,8 +1,15 @@
 export interface PostModel {
   id: number,
-  userId: number,
+  user: number,
+  user_details?: {
+    id: number;
+    name: string;
+    email: string;
+    study_program: string;
+  },
   text: string,
   image: string,
   title: string,
-  createdAt: string
+  created_at: string,
+  comment_count?: number
 }
