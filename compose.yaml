@@ -1,9 +1,6 @@
 version: '3.8'
 
 services:
-  # -----------------------------------------------------------------
-  # PYTHON BACKEND (BE)
-  # -----------------------------------------------------------------
   backend:
     build:
       context: ./be
@@ -11,13 +8,10 @@ services:
     container_name: social-media-backend
     restart: always
     environment:
-      # WICHTIG: Der Hostname für die interne DB-Verbindung ist immer der Service-Name 'db'
       POSTGRES_HOST: db
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-
-      # Zusammengesetzte URL (falls in settings.py verwendet)
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
 
       MINIO_ENDPOINT: minio:9000
@@ -25,20 +19,22 @@ services:
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       PORT: 8000
 
-      # Default Admin User (created on container start)
       DJANGO_CREATE_SUPERUSER: ${DJANGO_CREATE_SUPERUSER:-true}
       DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME:-admin}
       DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL:-admin@example.com}
       DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD:-admin123}
+
+      KEYCLOAK_SERVER_URL: http://keycloak:8080
+      KEYCLOAK_REALM: social-media-realm
+      KEYCLOAK_CLIENT_ID: social-media-backend-client
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
     ports:
       - "8000:8000"
     depends_on:
       - db
       - minio
+      - keycloak
 
-  # -----------------------------------------------------------------
-  # ANGULAR FRONTEND (FE)
-  # -----------------------------------------------------------------
   frontend:
     build:
       context: ./fe
@@ -46,15 +42,43 @@ services:
     container_name: social-media-frontend
     restart: always
     environment:
-      API_BASE_URL: http://backend:8000/api
+      API_BASE_URL: http://localhost:8000/api
+
+      KEYCLOAK_URL: http://localhost:8080
+      KEYCLOAK_REALM: social-media-realm
+      KEYCLOAK_CLIENT_ID: social-media-frontend-client
     ports:
       - "4200:80"
     depends_on:
       - backend
+      - keycloak
 
-  # -----------------------------------------------------------------
-  # POSTGRESQL DATABASE
-  # -----------------------------------------------------------------
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.1
+    container_name: social-media-keycloak
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USER:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_PORT: 8080
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+
+      KC_SPI_THEME_STATIC_MAX_AGE: -1
+      KC_SPI_THEME_CACHE_THEMES: "false"
+      KC_SPI_THEME_CACHE_TEMPLATES: "false"
+
+    ports:
+      - "8080:8080"
+    volumes:
+      - keycloak_data:/opt/keycloak/data/
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm.json
+    depends_on:
+      - db
+
   db:
     image: postgres:15-alpine
     container_name: social-media-db
@@ -68,9 +92,6 @@ services:
     ports:
       - "5432:5432"
 
-  # -----------------------------------------------------------------
-  # MINIO OBJECT STORAGE
-  # -----------------------------------------------------------------
   minio:
     build:
       context: ./minio
@@ -88,3 +109,4 @@ services:
 volumes:
   db_data:
   minio_data:
+  keycloak_data:
