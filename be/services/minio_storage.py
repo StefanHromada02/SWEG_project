@@ -79,6 +79,64 @@ class MinIOStorage:
             print(f"Error uploading image: {e}")
             return None
 
+    def upload_thumbnail(self, file_data, original_path: str) -> Optional[str]:
+        """
+        Upload a thumbnail image to MinIO.
+
+        Args:
+            file_data: BytesIO object containing the image data
+            original_path: Path to the original image (used to derive thumbnail path)
+
+        Returns:
+            str: URL path to the uploaded thumbnail, or None if upload failed
+        """
+        self._ensure_initialized()
+        try:
+            # Generate thumbnail filename based on original path
+            # e.g., posts/abc123.jpg -> posts/thumbnails/abc123.jpg
+            parts = original_path.split('/')
+            if len(parts) >= 2:
+                folder = parts[0]
+                filename = '/'.join(parts[1:])
+                thumbnail_path = f"{folder}/thumbnails/{filename}"
+            else:
+                thumbnail_path = f"thumbnails/{original_path}"
+
+            # Upload thumbnail
+            file_data.seek(0)  # Reset file pointer
+            self.client.upload_fileobj(
+                file_data,
+                self.bucket_name,
+                thumbnail_path,
+                ExtraArgs={'ContentType': 'image/jpeg'}
+            )
+
+            return thumbnail_path
+
+        except ClientError as e:
+            print(f"Error uploading thumbnail: {e}")
+            return None
+
+    def get_thumbnail_path(self, image_path: str) -> str:
+        """
+        Get the thumbnail path for a given image path.
+
+        Args:
+            image_path: Path to the original image
+
+        Returns:
+            str: Path to the thumbnail
+        """
+        if not image_path:
+            return ""
+        
+        parts = image_path.split('/')
+        if len(parts) >= 2:
+            folder = parts[0]
+            filename = '/'.join(parts[1:])
+            return f"{folder}/thumbnails/{filename}"
+        return f"thumbnails/{image_path}"
+
     def delete_image(self, image_path: str) -> bool:
         """
         Delete an image from MinIO.
@@ -131,6 +189,12 @@ class MinIOStorageProxy:
     # Expose methods so tests can patch attributes on this proxy
     def upload_image(self, *args, **kwargs):
         return self._get().upload_image(*args, **kwargs)
+
+    def upload_thumbnail(self, *args, **kwargs):
+        return self._get().upload_thumbnail(*args, **kwargs)
+
+    def get_thumbnail_path(self, *args, **kwargs):
+        return self._get().get_thumbnail_path(*args, **kwargs)
 
     def delete_image(self, *args, **kwargs):
         return self._get().delete_image(*args, **kwargs)

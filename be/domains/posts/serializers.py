@@ -8,6 +8,7 @@ class PostSerializer(serializers.ModelSerializer):
     image_file = serializers.ImageField(write_only=True, required=False)
     # URL-Pfad wird automatisch gesetzt (read-only)
     image = serializers.CharField(read_only=True)
+    thumbnail = serializers.CharField(read_only=True)
     # Nested user details for read operations
     user_details = UserSerializer(source='user', read_only=True)
     # Comment count
@@ -15,7 +16,7 @@ class PostSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Post
-        fields = ["id", "user", "user_details", "title", "text", "image", "image_file", "created_at", "comment_count"]
+        fields = ["id", "user", "user_details", "title", "text", "image", "thumbnail", "image_file", "created_at", "comment_count"]
         
     def get_comment_count(self, obj):
         """Return the number of comments for this post."""

@@ -8,8 +8,11 @@
   @if (post.image) {
     <img
       mat-card-image
-      [src]="environment.minioUrl + '/' + post.image"
+      [src]="getImageUrl()"
       class="post-image"
+      (click)="openFullImage()"
+      style="cursor: pointer;"
+      [title]="'Klicken zum Vergrößern'"
     />
   }
 
