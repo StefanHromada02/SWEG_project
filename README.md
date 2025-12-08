@@ -1,6 +1,31 @@
 # SWEG Social Media Project
 
-A Django REST API backend for a social media platform with support for users, posts, and comments. Built with Django REST Framework, PostgreSQL, and MinIO for object storage.
+A Django REST API backend for a social media platform with support for users, posts, and comments. Built with Django REST Framework, PostgreSQL, MinIO for object storage, and **Keycloak for authentication**.
+
+## 🔐 Keycloak Integration (NEW!)
+
+This project now includes **automatic user synchronization with Keycloak**! Users authenticate via Keycloak, and their information is automatically synced to Django. Posts and comments are automatically associated with the logged-in Keycloak user.
+
+### Quick Links for Keycloak Setup:
+- **📚 [Complete Setup Guide](IMPLEMENTATION_SUMMARY.md)** - Start here!
+- **⚡ [Quick Reference](KEYCLOAK_QUICKSTART.md)** - Fast commands and checklists
+- **📖 [Full Documentation](KEYCLOAK_INTEGRATION.md)** - Detailed explanations
+- **✅ [Setup Checklist](SETUP_CHECKLIST.md)** - Step-by-step verification
+- **🏗️ [Architecture Diagram](ARCHITECTURE_DIAGRAM.md)** - Visual flow diagrams
+
+### Quick Start with Keycloak:
+```powershell
+# 1. Run database migration
+.\migrate-database.ps1
+
+# 2. Setup and start services
+.\setup-keycloak-integration.ps1
+
+# 3. Configure Keycloak (see SETUP_CHECKLIST.md)
+
+# 4. Test integration
+.\test-keycloak-auth.ps1
+```
 
 ## 📋 Table of Contents
 
@@ -14,13 +39,15 @@ A Django REST API backend for a social media platform with support for users, po
 
 ## ✨ Features
 
-- **Users Management**: Create and manage user profiles with study programs and interests
-- **Posts**: Create, read, update, and delete posts with image uploads
-- **Comments**: Comment on posts with user attribution
-- **Image Storage**: MinIO object storage for media files
-- **API Documentation**: Auto-generated Swagger/ReDoc documentation
-- **Search & Filtering**: Full-text search and filtering capabilities
-- **PostgreSQL Database**: Robust relational database with foreign key relationships
+- **🔐 Keycloak Authentication**: Automatic user sync from Keycloak to Django (NEW!)
+- **👤 Users Management**: User profiles automatically synced from Keycloak with study programs and interests
+- **📝 Posts**: Create, read, update, and delete posts with image uploads (user auto-assigned from JWT token)
+- **💬 Comments**: Comment on posts with user attribution (user auto-assigned from JWT token)
+- **🖼️ Image Storage**: MinIO object storage for media files
+- **📚 API Documentation**: Auto-generated Swagger/ReDoc documentation
+- **🔍 Search & Filtering**: Full-text search and filtering capabilities
+- **🗄️ PostgreSQL Database**: Robust relational database with foreign key relationships
+- **🔒 JWT Authentication**: Token-based authentication with automatic validation
 
 ## 🔧 Prerequisites
 

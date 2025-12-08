@@ -6,7 +6,7 @@ from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiPara
 from drf_spectacular.types import OpenApiTypes
 
 from .models import Post
-from .serializers import PostSerializer
+from .serializers import PostSerializer, PostCreateSerializer
 from services.minio_storage import minio_storage
 
 
@@ -26,14 +26,22 @@ class PostViewSet(viewsets.ModelViewSet):
     """
     queryset = Post.objects.get_queryset()
     serializer_class = PostSerializer
+    
+    def get_serializer_class(self):
+        """Use PostCreateSerializer for create/update operations."""
+        if self.action in ['create', 'update', 'partial_update']:
+            return PostCreateSerializer
+        return PostSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['title', 'text']  # Suche in Titel und Text
     ordering_fields = ['created_at', 'title']  # Sortierung möglich
     ordering = ['-created_at']  # Standard: Neueste zuerst
-
+    permission_classes = [permissions.IsAuthenticated]
+    
     def perform_create(self, serializer):
         """
         Upload image to MinIO before saving post.
+        User is automatically set by serializer's HiddenField(CurrentUserDefault()).
         """
         image_file = self.request.FILES.get('image_file')
         image_path = None
@@ -47,7 +55,7 @@ class PostViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
         
-        # Save with MinIO path
+        # Save with MinIO path (user is set automatically by serializer)
         serializer.save(image=image_path or "")
     
     def perform_update(self, serializer):
@@ -86,12 +94,13 @@ class PostViewSet(viewsets.ModelViewSet):
     @extend_schema(
         tags=['Posts'],
         summary="Get user's posts",
-        description="Returns all posts for the current user",
+        description="Returns all posts for the current authenticated user",
         responses={200: PostSerializer(many=True)}
     )
     @action(detail=False, methods=['get'])
     def my_posts(self, request):
-        posts = Post.objects.get_queryset()
+        # Filter posts by the authenticated user
+        posts = Post.objects.filter(user=request.user)
         serializer = self.get_serializer(posts, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

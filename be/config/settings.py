@@ -51,13 +51,27 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'domains.users.middleware.KeycloakUserMiddleware',  # Add Keycloak user sync
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# Keycloak Configuration
+KEYCLOAK_SERVER_URL = os.getenv('KEYCLOAK_SERVER_URL', 'http://keycloak:8080')
+KEYCLOAK_REALM = os.getenv('KEYCLOAK_REALM', 'social-media-realm')
+KEYCLOAK_CLIENT_ID = os.getenv('KEYCLOAK_CLIENT_ID', 'social-media-backend-client')
+KEYCLOAK_CLIENT_SECRET = os.getenv('KEYCLOAK_CLIENT_SECRET', '')
+
 # REST Framework Configuration
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'domains.users.authentication.KeycloakAuthentication',
+        'rest_framework.authentication.SessionAuthentication',  # For Django admin
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
     'DEFAULT_FILTER_BACKENDS': [
         'rest_framework.filters.SearchFilter',
         'rest_framework.filters.OrderingFilter',

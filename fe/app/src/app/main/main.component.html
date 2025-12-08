@@ -1,4 +1,23 @@
+<div class="header" style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background-color: #f5f5f5; margin-bottom: 20px; border-radius: 8px;">
+  <h1 style="margin: 0;">Social Media Feed</h1>
+  <div class="user-actions">
+    @if (isLoggedIn) {
+      <span style="margin-right: 16px;">Welcome, {{ username }}!</span>
+      <button mat-raised-button color="warn" (click)="logout()">
+        <mat-icon>logout</mat-icon>
+        Logout
+      </button>
+    } @else {
+      <button mat-raised-button color="primary" (click)="login()">
+        <mat-icon>login</mat-icon>
+        Login to post
+      </button>
+    }
+  </div>
+</div>
+
 <app-new-post-modal (created)="onCreated()"></app-new-post-modal>
+
 @for (post of posts$ | async; track post.id) {
     <app-post [post]="post"></app-post>
 }

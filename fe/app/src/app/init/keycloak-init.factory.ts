@@ -14,6 +14,21 @@ export function initializeKeycloak(keycloak: KeycloakService) {
         checkLoginIframe: false
       },
       enableBearerInterceptor: true,
-      bearerExcludedUrls: ['/assets']
+      bearerExcludedUrls: ['/assets'],
+      // Add backend API to included URLs to ensure token is sent
+      bearerPrefix: 'Bearer',
+      shouldAddToken: (request) => {
+        const { method, url } = request;
+        
+        // Always add token to backend API requests
+        const isBackendUrl = url.includes('localhost:8000') || url.includes('/api/');
+        
+        // Don't add token to Keycloak or assets URLs
+        const isExcluded = url.includes('localhost:8080') || 
+                          url.includes('/assets') ||
+                          url.includes('keycloak');
+        
+        return isBackendUrl && !isExcluded;
+      }
     });
 }

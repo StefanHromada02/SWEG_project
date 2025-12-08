@@ -95,7 +95,7 @@ export class PostComponent implements OnInit{
     }
 
     const comment = {
-      user: this.post.user, // Using the post's user as the commenter
+      // User is automatically set by backend from JWT token
       post: this.post.id,
       text: this.newCommentText
     };

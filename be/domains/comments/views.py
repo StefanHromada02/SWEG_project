@@ -1,4 +1,4 @@
-from rest_framework import viewsets, filters
+from rest_framework import viewsets, filters, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
@@ -28,12 +28,30 @@ class CommentViewSet(viewsets.ModelViewSet):
     search_fields = ['text', 'user__name']
     ordering_fields = ['created_at']
     ordering = ['-created_at']
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_serializer_class(self):
         """Use different serializer for create/update operations."""
         if self.action in ['create', 'update', 'partial_update']:
             return CommentCreateSerializer
         return CommentSerializer
+    
+    def perform_create(self, serializer):
+        """
+        Automatically assign the authenticated user to the comment.
+        """
+        # Check if user is authenticated
+        if not self.request.user or not self.request.user.is_authenticated:
+            from rest_framework.exceptions import NotAuthenticated
+            raise NotAuthenticated("Authentication required to create comments")
+        
+        # Check if user is a real User object (not AnonymousUser)
+        from domains.users.models import User
+        if not isinstance(self.request.user, User):
+            from rest_framework.exceptions import NotAuthenticated
+            raise NotAuthenticated("Valid Keycloak authentication required")
+        
+        serializer.save(user=self.request.user)
 
     @extend_schema(
         tags=['Comments'],

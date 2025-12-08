@@ -40,7 +40,7 @@ export class NewPostModal {
   previewUrl?: string;
 
   form = this.fb.group({
-    user: ['', [Validators.required, Validators.maxLength(120)]],
+    // User field removed - automatically set by backend from JWT token
     title: ['', [Validators.required, Validators.maxLength(120)]],
     text: ['', [Validators.required, Validators.maxLength(5000)]],
   });
@@ -59,12 +59,15 @@ export class NewPostModal {
     }
   }
 
+  errorMessage: string | null = null;
+
   submit() {
     if (this.form.invalid || this.isSubmitting) return;
     this.isSubmitting = true;
+    this.errorMessage = null;
 
     const post: Partial<PostModel> = {
-      user: this.form.value.user ? Number(this.form.value.user) : undefined,
+      // User is automatically set by backend from JWT token
       title: this.form.value.title ?? undefined,
       text: this.form.value.text ?? undefined,
     };
@@ -76,8 +79,18 @@ export class NewPostModal {
         this.reset();
         this.close();
       },
-      error: () => {
+      error: (error) => {
         this.isSubmitting = false;
+        console.error('Error creating post:', error);
+        
+        // Show user-friendly error message
+        if (error.status === 401 || error.status === 403) {
+          this.errorMessage = 'Please log in to create a post';
+        } else if (error.status === 400) {
+          this.errorMessage = error.error?.message || 'Invalid post data';
+        } else {
+          this.errorMessage = 'Failed to create post. Please try again.';
+        }
       }
     });
   }

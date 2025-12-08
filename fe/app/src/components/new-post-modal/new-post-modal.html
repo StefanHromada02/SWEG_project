@@ -6,10 +6,7 @@
   <h2 mat-dialog-title>Create new post</h2>
   <div mat-dialog-content>
     <form [formGroup]="form" class="form">
-      <mat-form-field appearance="outline" class="full">
-        <mat-label>User ID</mat-label>
-        <input matInput type="number" formControlName="user" placeholder="Enter user ID" maxlength="120"/>
-      </mat-form-field>
+      <!-- User ID field removed - automatically set from logged-in Keycloak user -->
       <mat-form-field appearance="outline" class="full">
         <mat-label>Title</mat-label>
         <input matInput formControlName="title" placeholder="Enter a title" maxlength="120" />
@@ -46,6 +43,13 @@
         </div>
       }
     </form>
+    
+    @if(errorMessage) {
+      <div class="error-message" style="color: red; margin-top: 16px; padding: 12px; background-color: #ffebee; border-radius: 4px;">
+        <mat-icon style="vertical-align: middle; margin-right: 8px;">error</mat-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+    }
   </div>
   <button mat-raised-button color="primary" (click)="submit()" [disabled]="form.invalid || isSubmitting">
     @if(!isSubmitting) {
