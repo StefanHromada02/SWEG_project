@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { backendUrl } from '../../environments';
 import { PostModel } from '../models/post.model';
+import { CommentModel } from '../models/comment.model';
 
 @Injectable({
   providedIn: 'root'
@@ -20,9 +21,9 @@ export class ApiService {
   // Use the typed PostModel for creating a post; optionally attach an image file
   createPost(post: Partial<PostModel>, imageFile?: File): Observable<any> {
     const formData = new FormData();
-    // Backend expects 'user' not 'userId'
-    if (post.userId !== undefined && post.userId !== null) {
-      formData.append('user', String(post.userId));
+    // Backend expects 'user'
+    if (post.user !== undefined && post.user !== null) {
+      formData.append('user', String(post.user));
     }
     if (post.title) {
       formData.append('title', post.title);
@@ -34,5 +35,15 @@ export class ApiService {
       formData.append('image_file', imageFile);
     }
     return this.http.post(`${this.baseUrl}/posts/`, formData);
+  }
+
+  // Get comments for a specific post
+  getCommentsForPost(postId: number): Observable<CommentModel[]> {
+    return this.http.get<CommentModel[]>(`${this.baseUrl}/comments/by_post/?post_id=${postId}`);
+  }
+
+  // Create a new comment
+  createComment(comment: { user: number; post: number; text: string }): Observable<CommentModel> {
+    return this.http.post<CommentModel>(`${this.baseUrl}/comments/`, comment);
   }
 }

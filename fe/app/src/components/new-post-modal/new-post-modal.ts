@@ -40,7 +40,7 @@ export class NewPostModal {
   previewUrl?: string;
 
   form = this.fb.group({
-    userId: ['', [Validators.required, Validators.maxLength(120)]],
+    user: ['', [Validators.required, Validators.maxLength(120)]],
     title: ['', [Validators.required, Validators.maxLength(120)]],
     text: ['', [Validators.required, Validators.maxLength(5000)]],
   });
@@ -64,7 +64,7 @@ export class NewPostModal {
     this.isSubmitting = true;
 
     const post: Partial<PostModel> = {
-      userId: this.form.value.userId ? Number(this.form.value.userId) : undefined,
+      user: this.form.value.user ? Number(this.form.value.user) : undefined,
       title: this.form.value.title ?? undefined,
       text: this.form.value.text ?? undefined,
     };

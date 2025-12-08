@@ -1,14 +1,31 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZoneChangeDetection } from '@angular/core';
+import {
+  APP_INITIALIZER,
+  ApplicationConfig,
+  importProvidersFrom,
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
 
 import { routes } from './app.routes';
+import {KeycloakAngularModule, KeycloakService} from 'keycloak-angular';
+import {provideAnimations} from '@angular/platform-browser/animations';
+import {initializeKeycloak} from './init/keycloak-init.factory';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideBrowserGlobalErrorListeners(),
-    provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideHttpClient(withFetch())
-  ]
+
+    provideAnimations(),
+
+    provideHttpClient(),
+
+    importProvidersFrom(KeycloakAngularModule),
+
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeKeycloak,
+      multi: true,
+      deps: [KeycloakService],
+    },
+  ],
 };
