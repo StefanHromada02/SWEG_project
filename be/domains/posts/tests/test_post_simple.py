@@ -1,15 +1,16 @@
-from unittest.mock import MagicMock, patch
-
-from django.test import SimpleTestCase
+import pytest
+from unittest.mock import patch
 from domains.users.models import User
 from domains.posts.models import Post
 
 
-class PostSimpleTest(SimpleTestCase):
+class TestPostSimple:
+    """Simple unit tests for Post model."""
 
     @patch("domains.posts.models.Post.objects.create")
     @patch("domains.users.models.User.objects.create")
-    def test_create_post(self, mock_create_user, mock_create_post):
+    def test_create_post_mocked(self, mock_create_user, mock_create_post):
+        """Test creating a post with mocked database."""
         # Arrange – Fake User
         fake_user = User(
             id=1,
@@ -43,10 +44,8 @@ class PostSimpleTest(SimpleTestCase):
         )
 
         # Assert
-        self.assertEqual(post.id, 1)
-        self.assertEqual(post.user.name, "Alice")
-        self.assertEqual(str(post), "Hello World by Alice")
-
-        mock_create_user.assert_called_once()
-        mock_create_post.assert_called_once()
-        self.assertEqual(str(post), "Hello World by Alice")
+        assert post.id == 1
+        assert post.user.name == "Alice"
+        assert str(post) == "Hello World by Alice"
+        assert mock_create_user.call_count == 1
+        assert mock_create_post.call_count == 1

@@ -9,6 +9,7 @@ A Django REST API backend for a social media platform with support for users, po
 - [Quick Start](#quick-start)
 - [Project Structure](#project-structure)
 - [API Endpoints](#api-endpoints)
+- [Testing](#testing)
 - [Testing with Postman](#testing-with-postman)
 - [Development](#development)
 
@@ -187,6 +188,36 @@ Each domain follows a consistent structure:
 | DELETE | `/api/comments/{id}/` | Delete comment |
 | GET | `/api/comments/by_post/?post_id={id}` | Get comments for a post |
 | GET | `/api/comments/by_user/?user_id={id}` | Get comments by a user |
+
+## 🧪 Testing
+
+The project includes automated tests for models, serializers, views, and integration workflows.
+
+### Quick Test Run
+
+```powershell
+# From project root
+.\run-tests.ps1
+```
+
+### Manual Test Run in Docker
+
+```bash
+# Start services
+docker compose up -d
+
+# Run all tests
+docker compose exec backend python -m pytest domains/posts/tests/ -v
+
+# Run specific test file
+docker compose exec backend python -m pytest domains/posts/tests/test_models.py -v
+```
+
+**Test Coverage:**
+- 15 automated tests covering models, serializers, views, and integration
+- Tests run in Docker environment with PostgreSQL
+- Complete documentation in [be/TESTING.md](be/TESTING.md)
+- See [TEST_SUMMARY.md](TEST_SUMMARY.md) for details on what was fixed
 
 ## 📮 Testing with Postman
 
