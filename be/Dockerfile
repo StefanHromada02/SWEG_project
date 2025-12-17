@@ -10,10 +10,10 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Installiert die Abhängigkeiten global im Builder-Image (nicht in venv)
-# Wir installieren auch Pytest und Flake8 für die Tests im CI-Lauf
+# Wir installieren auch Pytest, pytest-cov und Flake8 für die Tests im CI-Lauf
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir pytest flake8
+    pip install --no-cache-dir pytest pytest-cov flake8
 
 # Stage 2: Laufzeit-Umgebung (Das finale, kleine Image)
 # Wir wechseln zu einem noch kleineren Image für die Produktion/Tests, das die Abhängigkeiten von Stage 1 erbt.

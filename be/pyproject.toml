@@ -52,9 +52,9 @@ extend-exclude = '''
 '''
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "domains"]
 python_files = ["test_*.py", "*_test.py"]
-addopts = "--cov=src --cov-report=term-missing --cov-report=html"
+addopts = "--cov=src --cov=domains --cov-report=term-missing --cov-report=html"
 
 [tool.mypy]
 python_version = "3.8"
