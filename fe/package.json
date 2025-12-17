@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "description": "Frontend for social media application",
   "scripts": {
-    "build": "echo 'Build placeholder for Angular app'"
+    "build": "mkdir -p dist && cp -r dist/* dist/ || true"
   }
 }

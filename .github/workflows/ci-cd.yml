@@ -52,7 +52,8 @@ jobs:
 
       - name: Run tests
         run: |
-          docker compose exec -T backend python -m pytest domains/posts/tests/ -v --cov=domains
+          docker compose exec -T backend \
+            python -m pytest domains/posts/tests/ -v --cov=domains
 
       - name: Cleanup
         if: always()
@@ -97,17 +98,25 @@ jobs:
 
       - name: Tag and push backend images
         run: |
-          docker tag social-media-backend ghcr.io/stefanhromada02/sweg_project/backend:latest
-          docker tag social-media-backend ghcr.io/stefanhromada02/sweg_project/backend:${{ github.sha }}
-          docker push ghcr.io/stefanhromada02/sweg_project/backend:latest
-          docker push ghcr.io/stefanhromada02/sweg_project/backend:${{ github.sha }}
+          docker tag sweg_project-backend \
+            ghcr.io/stefanhromada02/sweg_project/backend:latest
+          docker tag sweg_project-backend \
+            ghcr.io/stefanhromada02/sweg_project/backend:${{ github.sha }}
+          docker push \
+            ghcr.io/stefanhromada02/sweg_project/backend:latest
+          docker push \
+            ghcr.io/stefanhromada02/sweg_project/backend:${{ github.sha }}
 
       - name: Tag and push frontend images
         run: |
-          docker tag social-media-frontend ghcr.io/stefanhromada02/sweg_project/frontend:latest
-          docker tag social-media-frontend ghcr.io/stefanhromada02/sweg_project/frontend:${{ github.sha }}
-          docker push ghcr.io/stefanhromada02/sweg_project/frontend:latest
-          docker push ghcr.io/stefanhromada02/sweg_project/frontend:${{ github.sha }}
+          docker tag sweg_project-frontend \
+            ghcr.io/stefanhromada02/sweg_project/frontend:latest
+          docker tag sweg_project-frontend \
+            ghcr.io/stefanhromada02/sweg_project/frontend:${{ github.sha }}
+          docker push \
+            ghcr.io/stefanhromada02/sweg_project/frontend:latest
+          docker push \
+            ghcr.io/stefanhromada02/sweg_project/frontend:${{ github.sha }}
 
       - name: Cleanup
         if: always()
