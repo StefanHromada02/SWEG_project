@@ -7,13 +7,13 @@ class PostAdmin(admin.ModelAdmin):
     # Felder, die in der Admin-Liste angezeigt werden
     list_display = (
         "title",
-        "user",
+        "author_name",
         "created_at"
     )
 
     # Filtern nach User und Datum
     list_filter = (
-        "user",
+        "author_name",
         "created_at"
     )
 
@@ -21,7 +21,7 @@ class PostAdmin(admin.ModelAdmin):
     search_fields = (
         "title",
         "text",
-        "user__username"
+        "author_name"
     )
 
     # Die Erstellungszeit sollte nicht im Bearbeitungsformular geändert werden

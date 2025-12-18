@@ -6,7 +6,7 @@ from .models import Comment
 class CommentAdmin(admin.ModelAdmin):
     list_display = (
         "id",
-        "user",
+        "author_name",
         "post",
         "text_preview",
         "created_at"
@@ -14,13 +14,13 @@ class CommentAdmin(admin.ModelAdmin):
 
     list_filter = (
         "created_at",
-        "user",
+        "author_name",
         "post"
     )
 
     search_fields = (
         "text",
-        "user__name",
+        "author_name",
         "post__title"
     )
 

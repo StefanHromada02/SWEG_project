@@ -5,37 +5,30 @@ import {
   MatCard,
   MatCardActions,
   MatCardContent,
-  MatCardHeader,
-  MatCardSubtitle,
-  MatCardTitle
+  MatCardImage,
 } from '@angular/material/card';
 import {MatIcon} from '@angular/material/icon';
-import {MatButton, MatIconButton} from '@angular/material/button';
+import {MatButton} from '@angular/material/button';
 import {MatFormField, MatLabel} from '@angular/material/form-field';
 import {MatInput} from '@angular/material/input';
 import {FormsModule} from '@angular/forms';
-import {NgForOf, NgIf} from '@angular/common';
 import {environment} from '../../environments';
 import {ApiService} from '../../app/services/api.service';
 
 @Component({
   selector: 'app-post',
+  standalone: true,
   imports: [
     MatCardContent,
     MatCardActions,
     MatCard,
-    MatCardHeader,
-    MatCardTitle,
-    MatCardSubtitle,
     MatIcon,
     MatButton,
-    MatIconButton,
     MatFormField,
     MatInput,
     MatLabel,
     FormsModule,
-    NgIf,
-    NgForOf
+    MatCardImage
   ],
   templateUrl: './post.component.html',
   styleUrl: './post.component.css',
@@ -48,20 +41,16 @@ export class PostComponent implements OnInit{
   showCommentInput: boolean = false;
   newCommentText: string = '';
 
-  constructor(private apiService: ApiService) {}
+  constructor(private readonly apiService: ApiService) {}
 
   ngOnInit(): void {
-    if (this.post && this.post.created_at) {
+    if (this.post?.created_at) {
       this.formattedDate = new Date(this.post.created_at).toLocaleDateString('de-DE', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
       });
     }
-  }
-
-  onLike(): void {
-    console.log(`Post ${this.post.id} geliked!`);
   }
 
   toggleComments(): void {
@@ -75,7 +64,7 @@ export class PostComponent implements OnInit{
     this.apiService.getCommentsForPost(this.post.id).subscribe({
       next: (comments) => {
         // Sort comments by created_at in descending order (newest first)
-        this.comments = comments.sort((a, b) => 
+        this.comments = comments.sort((a: CommentModel, b: CommentModel) =>
           new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
         );
       },
@@ -95,7 +84,6 @@ export class PostComponent implements OnInit{
     }
 
     const comment = {
-      user: this.post.user, // Using the post's user as the commenter
       post: this.post.id,
       text: this.newCommentText
     };

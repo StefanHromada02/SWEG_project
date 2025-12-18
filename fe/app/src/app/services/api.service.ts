@@ -18,13 +18,8 @@ export class ApiService {
     return this.http.get(`${this.baseUrl}/posts/`);
   }
 
-  // Use the typed PostModel for creating a post; optionally attach an image file
   createPost(post: Partial<PostModel>, imageFile?: File): Observable<any> {
     const formData = new FormData();
-    // Backend expects 'user'
-    if (post.user !== undefined && post.user !== null) {
-      formData.append('user', String(post.user));
-    }
     if (post.title) {
       formData.append('title', post.title);
     }
@@ -43,7 +38,7 @@ export class ApiService {
   }
 
   // Create a new comment
-  createComment(comment: { user: number; post: number; text: string }): Observable<CommentModel> {
+  createComment(comment: { post: number; text: string }): Observable<CommentModel> {
     return this.http.post<CommentModel>(`${this.baseUrl}/comments/`, comment);
   }
 }

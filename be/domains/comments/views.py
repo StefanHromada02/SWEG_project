@@ -22,12 +22,24 @@ class CommentViewSet(viewsets.ModelViewSet):
     
     Provides CRUD operations and filtering for comments.
     """
-    queryset = Comment.objects.with_relations()
+    queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['text', 'user__name']
+    search_fields = ['text']
     ordering_fields = ['created_at']
     ordering = ['-created_at']
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return CommentCreateSerializer
+        return CommentSerializer
+
+    def perform_create(self, serializer):
+        # Extract author info from Keycloak token
+        token = self.request.auth
+        author_id = token.get('sub')
+        author_name = token.get('preferred_username', 'anonymous')
+        serializer.save(author_id=author_id, author_name=author_name)
 
     def get_serializer_class(self):
         """Use different serializer for create/update operations."""
