@@ -10,7 +10,7 @@ describe('PostComponent', () => {
 
   const mockPost: PostModel = {
     id: 1,
-    userId: 1,
+    user: 1,
     text: 'Das ist ein Testinhalt',
     image: 'test-image.jpg',
     title: 'Test Titel',
