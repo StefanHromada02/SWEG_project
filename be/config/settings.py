@@ -37,10 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.postgres',
+    # 'django.contrib.postgres',
     "rest_framework",
     "drf_spectacular",
-    "domains.users",
     "domains.posts",
     "domains.comments",
 ]
@@ -57,6 +56,9 @@ MIDDLEWARE = [
 
 # REST Framework Configuration
 REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'config.authentication.KeycloakAuthentication',
+    ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_FILTER_BACKENDS': [
         'rest_framework.filters.SearchFilter',

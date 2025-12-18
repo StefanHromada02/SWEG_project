@@ -3,11 +3,8 @@ from .managers import PostManager
 
 
 class Post(models.Model):
-    user = models.ForeignKey(
-        'users.User',
-        on_delete=models.CASCADE,
-        related_name='posts'
-    )
+    author_id = models.CharField(max_length=255)
+    author_name = models.CharField(max_length=255)
     title = models.CharField(max_length=200)
     text = models.TextField()
     image = models.TextField()
@@ -17,4 +14,4 @@ class Post(models.Model):
     objects = PostManager()
 
     def __str__(self):
-        return f"{self.title} by {self.user.name}"
+        return f"{self.title} by {self.author_name}"

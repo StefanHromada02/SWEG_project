@@ -6,7 +6,6 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, Sp
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("api/users/", include("domains.users.urls")),
     path("api/posts/", include("domains.posts.urls")),
     path("api/comments/", include("domains.comments.urls")),
     # OpenAPI Schema
