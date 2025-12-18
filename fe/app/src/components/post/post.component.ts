@@ -124,5 +124,23 @@ export class PostComponent implements OnInit{
     });
   }
 
+  getImageUrl(): string {
+    // Use thumbnail if available, otherwise use full image
+    const imagePath = this.post.thumbnail || this.post.image;
+    if (!imagePath) {
+      return '';
+    }
+    // Use the backend API endpoint to serve images
+    return `${environment.apiUrl}/posts/image/?path=${imagePath}`;
+  }
+
+  openFullImage(): void {
+    if (this.post.image) {
+      // Open full-size image in a new window
+      const fullImageUrl = `${environment.apiUrl}/posts/image/?path=${this.post.image}`;
+      window.open(fullImageUrl, '_blank');
+    }
+  }
+
   protected readonly environment = environment;
 }

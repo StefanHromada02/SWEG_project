@@ -11,6 +11,7 @@ class Post(models.Model):
     title = models.CharField(max_length=200)
     text = models.TextField()
     image = models.TextField()
+    thumbnail = models.TextField(blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)
 
     objects = PostManager()
