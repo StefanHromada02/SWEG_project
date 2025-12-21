@@ -33,18 +33,10 @@
     <mat-card-content class="comment-input-section">
       <mat-form-field appearance="outline" class="comment-input-field">
         <mat-label>Kommentar schreiben...</mat-label>
-        <textarea
-          matInput
-          [(ngModel)]="newCommentText"
-    <p class="post-meta">{{ post.author_name }} | {{ formattedDate }}</p>
-      [src]="environment.minioUrl + '/' + post.image"
-      alt="Post image"
-        <textarea
-          matInput
-          [(ngModel)]="newCommentText"
-          rows="3"
-          placeholder="Schreibe einen Kommentar...">
-        </textarea>
+        <textarea matInput
+                  [(ngModel)]="newCommentText"
+                  rows="3"
+                  placeholder="Schreibe einen Kommentar..."></textarea>
       </mat-form-field>
       <div class="comment-input-actions">
         <button mat-button (click)="toggleCommentInput()">Abbrechen</button>

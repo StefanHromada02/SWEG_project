@@ -113,8 +113,7 @@ export class PostComponent implements OnInit{
   }
 
   getImageUrl(): string {
-    // Use thumbnail if available, otherwise use full image
-    const imagePath = this.post.thumbnail || this.post.image;
+    const imagePath = this.post.image;
     if (!imagePath) {
       return '';
     }
