@@ -71,7 +71,7 @@ describe('MainComponent', () => {
   });
 
   it('should load posts from university "Technikum" on initialization', () => {
-    expect(apiServiceSpy.getPostsForUniversity).toHaveBeenCalledWith('Technikum');
+    expect(apiServiceSpy.getPostsForUniversity).toHaveBeenCalledWith('Technikum', undefined);
     component.posts$.subscribe(posts => {
       expect(posts.length).toBe(2);
       expect(posts).toEqual(mockPosts);
@@ -81,7 +81,7 @@ describe('MainComponent', () => {
   it('should refresh posts when onCreated is called', () => {
     apiServiceSpy.getPostsForUniversity.calls.reset();
     component.onCreated();
-    expect(apiServiceSpy.getPostsForUniversity).toHaveBeenCalledWith('Technikum');
+    expect(apiServiceSpy.getPostsForUniversity).toHaveBeenCalledWith('Technikum', undefined);
   });
 
   it('should render the correct number of post components via template', () => {
