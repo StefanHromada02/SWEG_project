@@ -4,6 +4,10 @@ import {PostComponent} from '../../components/post/post.component';
 import {Observable} from 'rxjs';
 import {AsyncPipe} from '@angular/common';
 import {NewPostModal} from '../../components/new-post-modal/new-post-modal';
+import {FormsModule} from '@angular/forms';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatInputModule} from '@angular/material/input';
+import {MatIconModule} from '@angular/material/icon';
 
 @Component({
   selector: 'app-main',
@@ -11,6 +15,10 @@ import {NewPostModal} from '../../components/new-post-modal/new-post-modal';
     PostComponent,
     AsyncPipe,
     NewPostModal,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatIconModule,
   ],
   templateUrl: './main.component.html',
   styleUrl: './main.component.css',
@@ -18,6 +26,7 @@ import {NewPostModal} from '../../components/new-post-modal/new-post-modal';
 export class MainComponent implements OnInit {
   apiService = inject(ApiService);
   posts$!: Observable<any[]>;
+  searchQuery: string = '';
 
   ngOnInit() {
     this.refreshPosts();
@@ -27,7 +36,11 @@ export class MainComponent implements OnInit {
     this.refreshPosts();
   }
 
+  onSearch() {
+    this.refreshPosts();
+  }
+
   private refreshPosts() {
-    this.posts$ = this.apiService.getPostsForUniversity("Technikum");
+    this.posts$ = this.apiService.getPostsForUniversity("Technikum", this.searchQuery || undefined);
   }
 }

@@ -6,3 +6,12 @@
   margin: auto;
   width: 75%;
 }
+
+.search-container {
+  margin-bottom: 20px;
+  padding: 10px;
+}
+
+.search-field {
+  width: 100%;
+}
